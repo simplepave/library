@@ -9,23 +9,23 @@ require_once(ABSPATH . 'SP_Validation.php');
 
 ?>
 <form id="" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
-    <input name="last_name"       type="text"  placeholder="Фамилия"        value="<?php echo $_POST['last_name']; ?>">
-    <input name="first_name"      type="text"  placeholder="Имя"            value="<?php echo $_POST['first_name']; ?>">
-    <input name="middle_name"     type="text"  placeholder="Отчество"       value="<?php echo $_POST['middle_name']; ?>">
-    <input name="date_birth"      type="text"  placeholder="Дата рождения"  value="<?php echo $_POST['date_birth']; ?>">
-    <input name="passport_series" type="text"  placeholder="Серия паспорта" value="<?php echo $_POST['passport_series']; ?>">
-    <input name="passport_issued" type="text"  placeholder="Дата выдачи"    value="<?php echo $_POST['passport_issued']; ?>">
-    <input name="phone"           type="tel"   placeholder="Ваш телефон"    value="<?php echo $_POST['phone']; ?>">
-    <input name="email"           type="email" placeholder="Ваш e-mail"     value="<?php echo $_POST['email']; ?>">
+    <input name="string"      type="text"  placeholder="STRING"      value="<?php echo $_POST['string']; ?>">
+    <input name="numeric"     type="text"  placeholder="NUMERIC"     value="<?php echo $_POST['numeric']; ?>">
+    <input name="float"       type="text"  placeholder="FLOAT"       value="<?php echo $_POST['float']; ?>">
+    <input name="confirmed"   type="text"  placeholder="CONFIRMED"   value="<?php echo $_POST['confirmed']; ?>">
+    <input name="regex"       type="text"  placeholder="REGEX"       value="<?php echo $_POST['regex']; ?>">
+    <input name="date_format" type="text"  placeholder="DATE_FORMAT" value="<?php echo $_POST['date_format']; ?>">
+    <input name="phone"       type="tel"   placeholder="PHONE"       value="<?php echo $_POST['phone']; ?>">
+    <input name="email"       type="email" placeholder="EMAIL"       value="<?php echo $_POST['email']; ?>">
     <div>
         <input name="accepted" type="checkbox" id="accepted" checked="checked">
-        <label for="accepted">Я даю согласие</label> ||
-        <input type="radio" name="browser" value="firefox" id="firefox">
-        <label for="firefox">Firefox</label>
-        <input type="radio" name="browser" value="opera" id="opera">
-        <label for="opera">Opera</label>
+        <label for="accepted">I agree</label> ||
+        <input type="radio" name="radio" value="radio_1" id="radio_1" checked="checked">
+        <label for="radio_1">R1</label>
+        <input type="radio" name="radio" value="radio_2" id="radio_2">
+        <label for="radio_2">R2</label>
     </div>
-    <input name="subject" type="hidden" value="Получить отчет">
+    <input name="subject" type="hidden" value="Тема письма!">
     <input type="submit" value="Отправить">
 </form>
 <?php
@@ -35,18 +35,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['phone'])) {
     $sp_valid = new SP_Validation();
 
     $validation = $sp_valid->validation([
-        'last_name'       => 'bail|min:3|max:25|group:mail',
-        'first_name'      => 'bail|min:3|max:25|group:mail',
-        'middle_name'     => 'group:order,mail|bail|min:3|max:25',
-        'date_birth'      => 'group:order,mail|bail|date_format:d.m.Y|confirmed:passport_issued',
-        'passport_series' => 'group:order|bail|min:10|max:25|type:int|numeric',
-        'passport_issued' => 'group:order|bail|date_format:d.m.Y',
-        'phone'           => 'bail|phone|max:25|group:mail',
-        'email'           => 'bail|email|max:100|group:mail',
-        'subject'         => 'type:string',
-        'accepted'        => 'accepted|group:take',
-        'browser'         => 'group:take',
+        'string'      => 'bail|min:3|max:7|group:string_1',
+        'numeric'     => 'group:numeric|numeric|between:3,7|type:int',
+        'float'       => 'bail|group:numeric|float|between:0.3,0.7|type:float',
+        'confirmed'   => 'bail|required|group:string|confirmed:date_format,DATE',
+        'regex'       => 'bail|group:regex|regex:/^\d+\,\d+$/|type:array,,',
+        'date_format' => 'bail|required|group:date,string|date_format:d.m.Y',
+        'phone'       => 'bail|group:regex|phone|max:25|type:array,',
+        'email'       => 'bail|group:regex|email|max:100',
+        'subject'     => 'group:string',
+        'accepted'    => 'accepted|group:take',
+        'radio'       => 'group:take',
     ]);
+
+    /*
+        new SP_Validation(false) = get_fields => false, get_empties => false
+
+        |group:key[,key]| = group array key([a-z0-9_,])
+        |bail|      = first error => break
+        |required|  = required
+
+        |required|accepted|
+        |string|max:255|min:3|confirmed:name[,title]|
+        |numeric|between:0,99|
+        |date|date_format:Y-m-d H:i:s|
+        |regex:/^.+$/i|float[:/reg/]|email[:/reg/]|phone[:/reg/]|
+
+        [:/reg/] || [,title] = optional parameter
+
+         type = int | bool | float | array
+        |type:array,|    === explode(' ', $value)
+        |type:array,,|   === explode(',', $value)
+        |type:array,sep| === explode('sep', $value)
+
+    */
 
     echo '<pre>';
 
@@ -58,8 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['phone'])) {
     dump('get_fields');
 
     echo '<hr><br>';
-
-    // intval | strval | floatval
 }
 
     function dump($name) {
