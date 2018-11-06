@@ -17,7 +17,10 @@ class SP_Validation {
     private $errors = [];
     private $empties = [];
     private $fields = [];
-    private $outer;
+
+    private $bail = false;
+    private $bail_on = false;
+    private $pullout;
 
     public $status = true;
 
@@ -25,26 +28,26 @@ class SP_Validation {
      * Construct
      */
 
-    public function __construct($outer = true)
+    public function __construct($pullout = true)
     {
-        $this->outer = $outer;
+        $this->pullout = $pullout;
 
         $this->validate = [
             'required'    => [false, 'value' => 'Обязательное поле.'],
             'accepted'    => [null,  'value' => 'Подтвердить выбор.'],
-            'max'         => [1,     'value' => 'Больше чем %s симв.', 'd' => [255]],
-            'min'         => [1,     'value' => 'Минимум %s симв.',    'd' => [3]],
+            'max'         => [1,     'value' => 'Больше чем %s симв.',  'd' => 255],
+            'min'         => [1,     'value' => 'Минимум %s симв.',     'd' => 3],
             'numeric'     => [null,  'value' => 'Не число.'],
-            'float'       => [1,     'value' => 'Не float.',           'd' =>['/^\d+\.\d+$/']],
-            'between'     => [2,     'value' => 'Не между %s и %s.',   'd' => [0,99]],
+            'float'       => [1,     'value' => 'Не float.',            'd' => '/^\d+\.\d+$/'],
+            'between'     => [2,     'value' => 'Не между %s и %s.',    'd' => [0,99]],
             'string'      => [null,  'value' => 'Не строка.'],
-            'regex'       => [1,     'value' => 'Ошибочный формат.',   'd' => ['/^.+$/i']],
+            'regex'       => [1,     'value' => 'Ошибочный формат.',    'd' => '/^.+$/i'],
             'date'        => [null,  'value' => 'Не является датой.'],
-            'date_format' => [1,     'value' => 'Формат: %s',          'd' => ['Y-m-d H:i:s']],
-            'confirmed'   => [[2,1], 'value' => 'Не совпадает с "%s".'],
-            'email'       => [1,     'value' => 'Не e-mail.',  'd' => ['/^.+@.+\..+$/i']],
-            'phone'       => [1,     'value' => 'Не телефон.', 'd' => ['/^\+?\d[-\s]?\(?\d{3}\)?[-\s]?[-\s\d]{7,9}$/']],
-            'type'        => [[2,1], 'd' => ['string']],
+            'date_format' => [1,     'value' => 'Формат: %s',           'd' => 'Y-m-d H:i:s'],
+            'confirmed'   => [[2,1], 'value' => 'Не совпадает с "%s".', 'd' => 'password'],
+            'email'       => [1,     'value' => 'Не e-mail.',  'd' => '/^.+@.+\..+$/i'],
+            'phone'       => [1,     'value' => 'Не телефон.', 'd' => '/^\+?\d[-\s]?\(?\d{3}\)?[-\s]?[-\s\d]{7,9}$/'],
+            'type'        => [[2,1], 'd' => 'string'],
         ];
     }
 
@@ -59,7 +62,8 @@ class SP_Validation {
                 $this->_name = $name;
                 $this->_value = $this->name_isset();
                 $variables = explode('|', $items);
-                $bail = in_array('bail', $variables);
+                $bail = $this->bail? !in_array('bail', $variables): in_array('bail', $variables);
+                $bail = $this->bail_on || $bail;
 
                 if (in_array('required', $variables)) $this->validate('required');
                 elseif (empty($this->_value) && !is_bool($this->_value) && $this->_value !== '0')
@@ -74,26 +78,42 @@ class SP_Validation {
                     if (array_key_exists($key, $this->validate)) {
                         $param = $this->validate[$key][0];
                         if (is_bool($param)) continue;
-                        $this->_params = [];
 
                         if (!is_null($param)) {
+                            $this->_params = [];
+
                             if ($args = isset($validate[1])? trim($validate[1]): false) {
-                                $limit = is_array($param)? $param[0]: $param;
-                                $params = explode(',', $args, $limit);
-                                $limit = isset($param[1])? $param[1]: $limit;
+                                $limit = (array)$param;
+                                $params = explode(',', $args, $limit[0]);
+                                $limit = isset($param[1])? $param[1]: $limit[0];
 
                                 if (count($params) >= $limit)
                                     $this->_params = array_map('trim', $params);
                             }
                             if (!$this->_params && isset($this->validate[$key]['d']))
-                                $this->_params = $this->validate[$key]['d'];
+                                $this->_params = (array)$this->validate[$key]['d'];
                         }
                         $this->validate($key);
                     }
                 }
-                $this->group($items);
+                if ($this->pullout) $this->group($items);
             }
+            // mail field name
         }
+    }
+
+    /**
+     * Set Bail
+     */
+
+    public function set_bail_rev()
+    {
+        $this->bail = true;
+    }
+
+    public function set_bail_on()
+    {
+        $this->bail_on = true;
     }
 
     /**
@@ -125,14 +145,14 @@ class SP_Validation {
         $field = isset($_POST[$name])? trim($_POST[$name]): false;
 
         if (!$request) {
-            if ($this->outer)    $this->fields['all'][$name] = $field;
+            if ($this->pullout)  $this->fields['all'][$name] = $field;
             if (is_bool($field)) $this->empties[] = $name;
         }
 
         return $field;
     }
 
-    public function group($value)
+    private function group($value)
     {
         if (preg_match('/group\s?:([a-z0-9_,\s]+)/', $value, $outer)) {
             $groups = explode(',', $outer[1]);
@@ -178,7 +198,7 @@ class SP_Validation {
 
     private function validate_type()
     {
-        if ($this->outer) {
+        if ($this->pullout) {
             $value = $this->_value;
             $type = $this->_params[0];
 
@@ -186,6 +206,7 @@ class SP_Validation {
                 case 'int':    $value = (int)$value; break;
                 case 'bool':   $value = (bool)$value; break;
                 case 'float':  $value = (float)$value; break;
+                case 'string': $value = (string)$value; break;
                 case 'array':
                     if (isset($this->_params[1])) {
                         $sep = $this->_params[1];
@@ -234,10 +255,12 @@ class SP_Validation {
 
     private function validate_between()
     {
-        if ($this->_value < $this->_params[0] || $this->_value > $this->_params[1])
+        if ($this->_value < $this->_params[0] || $this->_value > $this->_params[1]) {
             $this->_args = [$this->_params[0], $this->_params[1]];
+            return true;
+        }
 
-        return $this->_args? true: false;
+        return false;
     }
 
     /**
@@ -282,10 +305,12 @@ class SP_Validation {
 
     private function validate_max()
     {
-        if (mb_strlen($this->_value) > $this->_params[0])
+        if (mb_strlen($this->_value) > $this->_params[0]) {
             $this->_args = $this->_params[0];
+            return true;
+        }
 
-        return $this->_args? true: false;
+        return false;
     }
 
     /**
@@ -294,10 +319,12 @@ class SP_Validation {
 
     private function validate_min()
     {
-        if (mb_strlen($this->_value) < $this->_params[0])
+        if (mb_strlen($this->_value) < $this->_params[0]) {
             $this->_args = $this->_params[0];
+            return true;
+        }
 
-        return $this->_args? true: false;
+        return false;
     }
 
     /**
@@ -320,9 +347,10 @@ class SP_Validation {
         if (!$dateTime || $dateTime->format($this->_params[0]) != $this->_value) {
             $date = new DateTime();
             $this->_args = $date->format($this->_params[0]);
+            return true;
         }
 
-        return $this->_args? true: false;
+        return false;
     }
 
     /**
@@ -344,10 +372,12 @@ class SP_Validation {
     {
         $confirm = $this->name_isset($this->_params[0]);
 
-        if ($confirm != $this->_value)
+        if ($confirm != $this->_value) {
             $this->_args = isset($this->_params[1])? $this->_params[1]: $this->_params[0];
+            return true;
+        }
 
-        return $this->_args? true: false;
+        return false;
     }
 }
 

@@ -4,6 +4,32 @@
  * Project: Validation
  */
 
+/**
+ *   new SP_Validation(false) = get_fields => false, get_empties => false
+ *
+ *   $sp_valid->validation([]);
+ *   $sp_valid->set_bail_rev(); Revers Bail
+ *   $sp_valid->set_bail_on();  ALL On Bail
+ *
+ *   |group:key[,key...]| = group array key([a-z0-9_,])
+ *   |bail|      = first error => break
+ *   |required|  = required
+ *
+ *   |required|accepted|
+ *   |string|max:255|min:3|confirmed:name[,title]|
+ *   |numeric|between:0,99|
+ *   |date|date_format:Y-m-d H:i:s|
+ *   |regex:/^.+$/i|float[:/reg/]|email[:/reg/]|phone[:/reg/]|
+ *
+ *   [:/reg/] || [,title] = optional parameter
+ *
+ *    type = int | bool | float | array
+ *   |type:array,|    === explode(' ', $value)
+ *   |type:array,,|   === explode(',', $value)
+ *   |type:array,sep| === explode('sep', $value)
+ *
+ */
+
 define('ABSPATH', dirname(__FILE__) . '/');
 require_once(ABSPATH . 'SP_Validation.php');
 
@@ -34,12 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['phone'])) {
 
     $sp_valid = new SP_Validation();
 
+    // $sp_valid->set_bail_rev(); Revers Bail
+    // $sp_valid->set_bail_on();  ALL On Bail
+    // mail field name
+
     $validation = $sp_valid->validation([
-        'string'      => 'bail|min:3|max:7|group:string_1',
+        'string'      => 'bail|min:3|max:7|group:string_1|numeric|between:3,7',
         'numeric'     => 'group:numeric|numeric|between:3,7|type:int',
-        'float'       => 'bail|group:numeric|float|between:0.3,0.7|type:float',
-        'confirmed'   => 'bail|required|group:string|confirmed:date_format,DATE',
-        'regex'       => 'bail|group:regex|regex:/^\d+\,\d+$/|type:array,,',
+        'float'       => 'group:numeric|float|between:0.3,0.7|type:float',
+        'confirmed'   => 'required|group:string|confirmed:date_format,DATE',
+        'regex'       => 'group:regex|regex:/^\d+\,\d+$/|type:array,,',
         'date_format' => 'bail|required|group:date,string|date_format:d.m.Y',
         'phone'       => 'bail|group:regex|phone|max:25|type:array,',
         'email'       => 'bail|group:regex|email|max:100',
@@ -47,28 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['phone'])) {
         'accepted'    => 'accepted|group:take',
         'radio'       => 'group:take',
     ]);
-
-    /*
-        new SP_Validation(false) = get_fields => false, get_empties => false
-
-        |group:key[,key]| = group array key([a-z0-9_,])
-        |bail|      = first error => break
-        |required|  = required
-
-        |required|accepted|
-        |string|max:255|min:3|confirmed:name[,title]|
-        |numeric|between:0,99|
-        |date|date_format:Y-m-d H:i:s|
-        |regex:/^.+$/i|float[:/reg/]|email[:/reg/]|phone[:/reg/]|
-
-        [:/reg/] || [,title] = optional parameter
-
-         type = int | bool | float | array
-        |type:array,|    === explode(' ', $value)
-        |type:array,,|   === explode(',', $value)
-        |type:array,sep| === explode('sep', $value)
-
-    */
 
     echo '<pre>';
 
@@ -81,6 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['phone'])) {
 
     echo '<hr><br>';
 }
+
+    /**
+     * Test var_dump()
+     */
 
     function dump($name) {
         global $sp_valid;
