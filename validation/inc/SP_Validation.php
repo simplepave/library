@@ -1,6 +1,10 @@
 <?php if (!defined('ABSPATH')) exit('No direct script access allowed');
 
 /**
+ * Project: Validation
+ */
+
+/**
  * @SimplePAVE
  * https://t.me/SimplePAVE
  * info@simplepave.ru
@@ -35,19 +39,21 @@ class SP_Validation {
         $this->validate = [
             'required'    => [false, 'value' => 'Обязательное поле.'],
             'accepted'    => [null,  'value' => 'Подтвердить выбор.'],
-            'max'         => [1,     'value' => 'Больше чем %s симв.',  'd' => 255],
-            'min'         => [1,     'value' => 'Минимум %s симв.',     'd' => 3],
+            'max'         => [1,     'value' => 'Больше чем %s симв.',  'default' => 255],
+            'min'         => [1,     'value' => 'Минимум %s симв.',     'default' => 3],
             'numeric'     => [null,  'value' => 'Не число.'],
-            'float'       => [1,     'value' => 'Не float.',            'd' => '/^\d+\.\d+$/'],
-            'between'     => [2,     'value' => 'Не между %s и %s.',    'd' => [0,99]],
+            'float'       => [null,  'value' => 'Не float.',            'other' => '/^\d+(\.|\,)\d+$/'],
+            'between'     => [2,     'value' => 'Не между %s и %s.',    'default' => [0,99]],
             'string'      => [null,  'value' => 'Не строка.'],
-            'regex'       => [1,     'value' => 'Ошибочный формат.',    'd' => '/^.+$/i'],
+            'regex'       => [1,     'value' => 'Ошибочный формат.'],
             'date'        => [null,  'value' => 'Не является датой.'],
-            'date_format' => [1,     'value' => 'Формат: %s',           'd' => 'Y-m-d H:i:s'],
-            'confirmed'   => [[2,1], 'value' => 'Не совпадает с "%s".', 'd' => 'password'],
-            'email'       => [1,     'value' => 'Не e-mail.',  'd' => '/^.+@.+\..+$/i'],
-            'phone'       => [1,     'value' => 'Не телефон.', 'd' => '/^\+?\d[-\s]?\(?\d{3}\)?[-\s]?[-\s\d]{7,9}$/'],
-            'type'        => [[2,1], 'd' => 'string'],
+            'date_format' => [1,     'value' => 'Формат: %s',           'example' => 'Y-m-d H:i:s'],
+            'confirmed'   => [[2,1], 'value' => 'Не совпадает с "%s".'],
+            'email'       => [null,  'value' => 'Не e-mail.',  'other' => '/^.+@.+\..+$/i'],
+            'phone'       => [null,  'value' => 'Не телефон.',
+                                                'other' => '/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?[\d-_\s]{7,14}$/'],
+            'type'        => [[2,1]],
+            'title'       => [1],
         ];
     }
 
@@ -61,7 +67,8 @@ class SP_Validation {
             foreach ($data as $name => $items) {
                 $this->_name = $name;
                 $this->_value = $this->name_isset();
-                $variables = explode('|', $items);
+                $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '|'));
+
                 $bail = $this->bail? !in_array('bail', $variables): in_array('bail', $variables);
                 $bail = $this->bail_on || $bail;
 
@@ -84,21 +91,29 @@ class SP_Validation {
 
                             if ($args = isset($validate[1])? trim($validate[1]): false) {
                                 $limit = (array)$param;
+                                $args = str_replace('\|', '|', $args);
                                 $params = explode(',', $args, $limit[0]);
                                 $limit = isset($param[1])? $param[1]: $limit[0];
 
                                 if (count($params) >= $limit)
                                     $this->_params = array_map('trim', $params);
                             }
-                            if (!$this->_params && isset($this->validate[$key]['d']))
-                                $this->_params = (array)$this->validate[$key]['d'];
+
+                            if (!$this->_params && isset($this->validate[$key]['default']))
+                                $this->_params = (array)$this->validate[$key]['default'];
+
+                            if ($this->_params) $this->validate($key);
                         }
-                        $this->validate($key);
+                        else {
+                            if (isset($this->validate[$key]['other']))
+                                $this->_params = (array)$this->validate[$key]['other'];
+
+                            $this->validate($key);
+                        }
                     }
                 }
                 if ($this->pullout) $this->group($items);
             }
-            // mail field name
         }
     }
 
@@ -122,7 +137,7 @@ class SP_Validation {
 
     public function get_errors()
     {
-        return $this->errors;
+        return $this->errors?: false;
     }
 
     public function get_empties()
@@ -144,17 +159,18 @@ class SP_Validation {
         $name = $request?: $this->_name;
         $field = isset($_POST[$name])? trim($_POST[$name]): false;
 
-        if (!$request) {
-            if ($this->pullout)  $this->fields['all'][$name] = $field;
-            if (is_bool($field)) $this->empties[] = $name;
-        }
+        if (!$request && $this->pullout)
+            $this->fields['all'][$name]['value'] = $field;
+
+        if (!$request && is_bool($field))
+            $this->empties[] = $name;
 
         return $field;
     }
 
     private function group($value)
     {
-        if (preg_match('/group\s?:([a-z0-9_,\s]+)/', $value, $outer)) {
+        if (preg_match('/group\s?:([^|]+)/', $value, $outer)) {
             $groups = explode(',', $outer[1]);
             $name = $this->_name;
 
@@ -173,10 +189,8 @@ class SP_Validation {
     {
         $value = $this->validate[$key]['value'];
 
-        if ($this->_args) {
-            $args = is_array($this->_args)? $this->_args: (array)$this->_args;
-            $value = vsprintf($value, $args);
-        }
+        if ($this->_args)
+            $value = vsprintf($value, (array)$this->_args);
 
         $this->errors[$this->_name][$key] = $value;
         $this->status && $this->status = false;
@@ -205,8 +219,7 @@ class SP_Validation {
             switch ($type) {
                 case 'int':    $value = (int)$value; break;
                 case 'bool':   $value = (bool)$value; break;
-                case 'float':  $value = (float)$value; break;
-                case 'string': $value = (string)$value; break;
+                case 'float':  $value = (float)str_replace(',', '.', $value); break;
                 case 'array':
                     if (isset($this->_params[1])) {
                         $sep = $this->_params[1];
@@ -216,7 +229,7 @@ class SP_Validation {
                 break;
             }
 
-            $this->fields['all'][$this->_name] = $value;
+            $this->fields['all'][$this->_name]['value'] = $value;
         }
 
         return false;
@@ -379,6 +392,19 @@ class SP_Validation {
 
         return false;
     }
+
+    /**
+     * Title:(title)
+     */
+
+    public function validate_title()
+    {
+        if ($this->pullout)
+            $this->fields['all'][$this->_name]['title'] = $this->_params[0];
+
+        return false;
+    }
+
 }
 
 endif;
