@@ -138,7 +138,7 @@ if ($page_index) :
                                     <select name="select" class="form-control custom-select">
                                         <option value="city1" selected>City One</option>
                                         <option value="city2">City Two</option>
-                                        <option value="city3">City Ten</option>
+                                        <option value="city3">City Three</option>
                                     </select>
                                 </div>
                             </div>
