@@ -10,36 +10,34 @@
  * info@simplepave.ru
  */
 
-define('ABSPATH', dirname(__FILE__) . '/');
-
-require_once(ABSPATH . 'inc/helpers.php');
-require_once(ABSPATH . 'inc/SP_Validation.php');
-
-$page_index = true;
-
-/**
- * ************* Settings *************
- */
-
-/**
- * Views
- */
-
-// ... My Views
-// ... /inc/( view-default )/[file.php]
-$view = 'view-default';
+/* ************************************ */
+/* ************* Settings ************* */
+/* ************************************ */
 
 /**
  * Test template
  */
 
 // ... My Test Templates
-// sp_test('test-default');
-// sp_test('test-my_template');
+// $sp_test = 'test-default';
+// $sp_test = 'test-simple';
 
 /**
- * ********* End Settings *************
+ * Views
  */
+
+$view = 'view-default';
+
+/* ************************************ */
+/* ********* End Settings ************* */
+/* ************************************ */
+
+define('ABSPATH', dirname(__FILE__) . '/');
+
+require_once(ABSPATH . 'inc/helpers.php');
+require_once(ABSPATH . 'inc/SP_Validation.php');
+
+$sp_valid = new SP_Validation(true);
 
 /**
  *   new SP_Validation(false) = get_fields => false, get_empties => false
@@ -74,14 +72,19 @@ $view = 'view-default';
  *
  */
 
-if ($page_index) :
-    require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
+$page_title = get_class($sp_valid);
+
+require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
+
 ?>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12 mt-3">
             <form id="" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
                 <div class="container-fluid pl-0">
+<?php
+if (!isset($sp_test)) :
+?>
                     <div class="form-row justify-content-start">
                         <div class="col-9">
                             <div class="form-row mb-3">
@@ -144,9 +147,14 @@ if ($page_index) :
                             </div>
                         </div>
                     </div>
+<input name="subject" type="hidden" value="Subject!">
+<?php
+else :
+    sp_test($sp_test);
+endif;
+?>
                     <div class="form-row mt-3">
                         <div class="col-12" style="align-self: flex-end">
-<input name="subject" type="hidden" value="Тема письма!">
 <input type="submit" value="Submit" class="btn btn-info w-100">
                         </div>
                     </div>
@@ -157,38 +165,41 @@ if ($page_index) :
 </div>
 <?php
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $sp_valid = new SP_Validation();
+    if (!isset($sp_test)) {
 
-    // $sp_valid->set_bail_rev(); // Revers Bail
-    // $sp_valid->set_bail_on();  // ALL On Bail
+        // $sp_valid->set_bail_rev(); // Revers Bail
+        // $sp_valid->set_bail_on();  // ALL On Bail
 
-    $sp_valid->set_auto_test([
-        'string'      => 'String str',
-        'numeric'     => '3',
-        'float'       => '47,10',
-        'confirmed'   => 'user@user.com',
-        'regex'       => 'http://site.com',
-        'date_format' => '15.12.2013',
-        'phone'       => '+71112223344',
-        'email'       => 'user@user.com',
-    ]);
+        $sp_valid->set_auto_test([
+            'string'      => 'String str',
+            'numeric'     => '3',
+            'float'       => '47,10',
+            'confirmed'   => 'user@user.com',
+            'regex'       => 'http://site.com',
+            'date_format' => '15.12.2013',
+            'phone'       => '+71112223344',
+            'email'       => 'user@user.com',
+            'select'      => 'city2',
+        ]);
 
-    $validation = $sp_valid->validation([
-        'string'      => 'bail|group:string|min:3|max:13',
-        'numeric'     => 'numeric|between:3,7|type:int',
-        'float'       => 'float|type:float',
-        'confirmed'   => 'required|confirmed:email,E-mail',
-        'regex'       => 'regex:/^https?:\/\/\S*?\.\S*?$/|type:float',
-        'date_format' => 'date_format:d.m.Y',
-        'phone'       => 'phone|max:25',
-        'email'       => 'email|max:100|type:array,@',
-        'subject'     => 'group:string',
-        'accepted'    => 'accepted|group:take',
-        'options'     => 'group:take',
-        'select'      => 'title:Select City|group:state',
-    ]);
+        $validation = $sp_valid->validation([
+            'string'      => 'bail|group:string|min:3|max:13',
+            'numeric'     => 'numeric|between:3,7|type:int',
+            'float'       => 'float|type:float',
+            'confirmed'   => 'required|confirmed:email,E-mail',
+            'regex'       => 'regex:/^https?:\/\/\S*?\.\S*?$/|type:float',
+            'date_format' => 'date_format:d.m.Y',
+            'phone'       => 'phone|max:25',
+            'email'       => 'email|max:100|type:array,@',
+            'subject'     => 'group:string',
+            'accepted'    => 'accepted|group:take',
+            'options'     => 'group:take',
+            'select'      => 'title:Select City|group:state',
+        ]);
+
+    }
 
 ?>
 <div class="container-fluid">
@@ -196,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="col-12">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-2 pl-0">
+                    <div class="col-2 pl-0" style="position: absolute; left: 0; margin-left: 15px;">
 <?php
     if ($sp_valid->status) {
         $class = 'border-success text-success';
@@ -208,6 +219,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
                         <div class="rounded text-center mt-3 py-2 border <?php echo $class; ?>">
                             <span>Status : <?php echo $text; ?></span>
+                        </div>
+                    </div>
+                    <div class="col-2 pl-0" style="margin-right: auto; margin-left: auto;">
+                        <div class="rounded text-center mt-3 py-2 border border-info text-info">
+                            <span><?php echo $page_title; ?></span>
                         </div>
                     </div>
 <?php
@@ -263,5 +279,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 <?php
 }
+
 require_once(ABSPATH . 'inc/' . $view . '/footer-default.php');
-endif;

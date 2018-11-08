@@ -63,7 +63,7 @@ class SP_Validation {
 
     public function validation($data = false)
     {
-        if (is_array($data)) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && is_array($data)) {
             foreach ($data as $name => $items) {
                 $this->_name = $name;
                 $this->_value = $this->name_isset();

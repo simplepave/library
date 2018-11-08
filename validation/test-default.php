@@ -10,26 +10,11 @@
  * info@simplepave.ru
  */
 
-/**
- * Header view
- */
-
-require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
-
 ?>
-<form id="" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
     <input name="phone"   type="tel"    value="<?php echo $_POST['phone']; ?>" placeholder="PHONE">
     <input name="email"   type="email"  value="<?php echo $_POST['email']; ?>" placeholder="EMAIL">
-    <div>
-        <input name="subject" type="hidden" value="Тема письма!">
-        <input name="submit"  type="submit" value="Отправить">
-    </div>
-</form>
+    <input name="subject" type="hidden" value="Subject!">
 <?php
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    $sp_valid = new SP_Validation(true);
 
     // $sp_valid->set_bail_rev(); // Revers Bail
     // $sp_valid->set_bail_on();  // ALL On Bail
@@ -69,22 +54,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // $sp_valid->get_empties()
     // $sp_valid->get_errors()
     // $sp_valid->get_fields()
-
-    echo '<pre>';
-
-    echo 'Status : ';
-    var_dump($sp_valid->status);
-    echo '<br>';
-
-    dump('get_empties', false);
-    dump('get_errors', false);
-    dump('get_fields');
-
-    echo '<hr><br>';
-}
-
-/**
- * Footer view
- */
-
-require_once(ABSPATH . 'inc/' . $view . '/footer-default.php');

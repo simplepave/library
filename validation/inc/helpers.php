@@ -36,9 +36,9 @@ if (!function_exists('dump')) {
 
 if (!function_exists('sp_test')) {
     function sp_test($name) {
-        global $view;
         global $sp_valid;
-        global $page_index;
-        $page_index = !@include(ABSPATH . $name . '.php');
+        global $page_title;
+        $page_title = $name;
+        return !@include(ABSPATH . $name . '.php');
     }
 }
