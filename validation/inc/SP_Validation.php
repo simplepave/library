@@ -66,7 +66,7 @@ class SP_Validation {
             foreach ($data as $name => $items) {
                 $this->_name = $name;
                 $this->_value = $this->name_isset();
-                $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '|'));
+                $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '|')); // ?
 
                 $bail = $this->bail_rev? !in_array('bail', $variables): in_array('bail', $variables);
                 $bail = $this->bail_on || $bail;

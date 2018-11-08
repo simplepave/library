@@ -35,13 +35,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // $sp_valid->set_bail_on();  // ALL On Bail
 
     /**
-     * bail | group:key[,key...] | title
+     * bail | group:key[,key...]( not | ) | title:title
      * required | accepted
      * max:255 | min:3 | confirmed:name[,title]
      * numeric | between:0,99
      * date | date_format:Y-m-d H:i:s
      * regex:/^.+$/i ( \| === | ) | float | email | phone
+     *
      * type = int | bool | float ( , or . ) | array
+     * |type:int|       => (int)$value
+     * |type:bool|      => (bool)$value
+     * |type:float|     => (float)str_replace(',', '.', $value)
+     * |type:array,|    === explode(' ', $value)
+     * |type:array,,|   === explode(',', $value)
+     * |type:array,\||  === explode('|', $value)
+     * |type:array,sep| === explode('sep', $value)
      *
      * shield = ( | => \| )
      */

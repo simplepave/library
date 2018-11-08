@@ -51,9 +51,9 @@ $view = 'view-default';
  *   shield = ( | => \| )
  *
  *   |group:key[,key...]( not | )| = group array key
- *   |title|     = title parameter
- *   |bail|      = first error => break
- *   |required|  = required
+ *   |title:title| = title parameter
+ *   |bail|        = first error => break
+ *   |required|    = required
  *
  *   |required|accepted|
  *   |string|max:255|min:3|confirmed:name[,title]|
@@ -64,8 +64,12 @@ $view = 'view-default';
  *   [,title] = optional parameter
  *
  *    type = int | bool | float ( , or . ) | array
+ *   |type:int|       => (int)$value
+ *   |type:bool|      => (bool)$value
+ *   |type:float|     => (float)str_replace(',', '.', $value)
  *   |type:array,|    === explode(' ', $value)
  *   |type:array,,|   === explode(',', $value)
+ *   |type:array,\||  === explode('|', $value)
  *   |type:array,sep| === explode('sep', $value)
  *
  */
@@ -79,11 +83,7 @@ if ($page_index) :
             <form id="" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
                 <div class="container-fluid pl-0">
                     <div class="form-row justify-content-start">
-                        <div class="col-1" style="align-self: flex-end">
-<input name="subject" type="hidden" value="Тема письма!">
-<input type="submit" value="Submit" class="btn btn-info w-100" style="padding-top: 33px; padding-bottom: 33px;">
-                        </div>
-                        <div class="col-8">
+                        <div class="col-9">
                             <div class="form-row mb-3">
                                 <div class="col-3">
 <input name="string" type="text" placeholder="STRING" value="<?php echo $_POST['string']; ?>" class="form-control">
@@ -92,7 +92,7 @@ if ($page_index) :
 <input name="numeric" type="text" placeholder="NUMERIC" value="<?php echo $_POST['numeric']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="float" type="text"  placeholder="FLOAT" value="<?php echo $_POST['float']; ?>" class="form-control">
+<input name="date_format" type="text" placeholder="DATE_FORMAT" value="<?php echo $_POST['date_format']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
 <input name="confirmed" type="text"  placeholder="CONFIRMED" value="<?php echo $_POST['confirmed']; ?>" class="form-control">
@@ -100,10 +100,10 @@ if ($page_index) :
                             </div>
                             <div class="form-row">
                                 <div class="col-3">
-<input name="regex" type="text"  placeholder="REGEX: 999.99" value="<?php echo $_POST['regex']; ?>" class="form-control">
+<input name="regex" type="text"  placeholder="REGEX: http://site.com" value="<?php echo $_POST['regex']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="date_format" type="text" placeholder="DATE_FORMAT" value="<?php echo $_POST['date_format']; ?>" class="form-control">
+<input name="float" type="text"  placeholder="FLOAT" value="<?php echo $_POST['float']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
 <input name="phone" type="tel" placeholder="PHONE" value="<?php echo $_POST['phone']; ?>" class="form-control">
@@ -136,13 +136,18 @@ if ($page_index) :
                             <div class="form-row align-items-center">
                                 <div class="col">
                                     <select name="select" class="form-control custom-select">
-                                        <option value="1" selected>Choose...</option>
-                                        <option value="2">One</option>
-                                        <option value="3">Two</option>
-                                        <option value="10">Ten</option>
+                                        <option value="city1" selected>City One</option>
+                                        <option value="city2">City Two</option>
+                                        <option value="city3">City Ten</option>
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-row mt-3">
+                        <div class="col-12" style="align-self: flex-end">
+<input name="subject" type="hidden" value="Тема письма!">
+<input type="submit" value="Submit" class="btn btn-info w-100">
                         </div>
                     </div>
                 </div>
@@ -160,18 +165,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // $sp_valid->set_bail_on();  // ALL On Bail
 
     $validation = $sp_valid->validation([
-        'string'      => 'title:Строка тест|bail|group:string|min:3|max:7',
-        'numeric'     => 'group:numeric|numeric|between:3,7|type:int',
-        'float'       => 'group:numeric|float|type:float',
-        'confirmed'   => 'required|group:string|confirmed:date_format,DATE_FORMAT',
-        'regex'       => 'group:regex|regex:/^\d+(\.\|\,)\d+$/|type:array,,',
-        'date_format' => 'bail|required|group:date,string|date_format:d.m.Y',
-        'phone'       => 'bail|group:regex|phone|max:25|type:array,',
-        'email'       => 'bail|group:regex|email|max:100',
+        'string'      => 'bail|group:string|min:3|max:7',
+        'numeric'     => 'numeric|between:3,7|type:int',
+        'float'       => 'float|type:float',
+        'confirmed'   => 'required|confirmed:email,E-mail',
+        'regex'       => 'regex:/^https?:\/\/\S*?\.\S*?$/|type:float',
+        'date_format' => 'date_format:d.m.Y',
+        'phone'       => 'phone|max:25',
+        'email'       => 'email|max:100|type:array,@',
         'subject'     => 'group:string',
         'accepted'    => 'accepted|group:take',
         'options'     => 'group:take',
-        'select'      => 'group:take|between:1,7',
+        'select'      => 'title:Select City|group:state',
     ]);
 
 ?>
