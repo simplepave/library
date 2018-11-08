@@ -152,7 +152,7 @@ if ($page_index) :
 </div>
 <?php
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['phone'])) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $sp_valid = new SP_Validation();
 
