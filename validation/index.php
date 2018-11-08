@@ -10,27 +10,7 @@
  * info@simplepave.ru
  */
 
-/* ************************************ */
-/* ************* Settings ************* */
-/* ************************************ */
-
-/**
- * Test template
- */
-
-// ... My Test Templates
-// $sp_test = 'test-default';
-// $sp_test = 'test-simple';
-
-/**
- * Views
- */
-
 $view = 'view-default';
-
-/* ************************************ */
-/* ********* End Settings ************* */
-/* ************************************ */
 
 define('ABSPATH', dirname(__FILE__) . '/');
 
@@ -72,7 +52,20 @@ $sp_valid = new SP_Validation(true);
  *
  */
 
-$page_title = get_class($sp_valid);
+$home_title = get_class($sp_valid);
+$sp_menu = [];
+$filelist = glob('*.php');
+
+foreach ($filelist as $file) {
+    $file = rtrim($file, '.php');
+    if ($file == 'index')
+        $sp_menu[$file] = $_SERVER['PHP_SELF'];
+    else
+        $sp_menu[$file] = $_SERVER['PHP_SELF'] . '?page=' . $file;
+}
+
+if (isset($_GET['page']))
+    $get_page = $_GET['page'];
 
 require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
 
@@ -83,36 +76,36 @@ require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
             <form id="" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
                 <div class="container-fluid pl-0">
 <?php
-if (!isset($sp_test)) :
+if (!isset($get_page)) :
 ?>
                     <div class="form-row justify-content-start">
                         <div class="col-9">
                             <div class="form-row mb-3">
                                 <div class="col-3">
-<input name="string" type="text" placeholder="STRING" value="<?php echo $_POST['string']; ?>" class="form-control">
+                                    <input name="string" type="text" placeholder="STRING" value="<?php echo $_POST['string']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="numeric" type="text" placeholder="NUMERIC" value="<?php echo $_POST['numeric']; ?>" class="form-control">
+                                    <input name="numeric" type="text" placeholder="NUMERIC" value="<?php echo $_POST['numeric']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="date_format" type="text" placeholder="DATE_FORMAT" value="<?php echo $_POST['date_format']; ?>" class="form-control">
+                                    <input name="date_format" type="text" placeholder="DATE_FORMAT" value="<?php echo $_POST['date_format']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="confirmed" type="text"  placeholder="CONFIRMED" value="<?php echo $_POST['confirmed']; ?>" class="form-control">
+                                    <input name="confirmed" type="text"  placeholder="CONFIRMED" value="<?php echo $_POST['confirmed']; ?>" class="form-control">
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="col-3">
-<input name="regex" type="text"  placeholder="REGEX: http://site.com" value="<?php echo $_POST['regex']; ?>" class="form-control">
+                                    <input name="regex" type="text"  placeholder="REGEX: http://site.com" value="<?php echo $_POST['regex']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="float" type="text"  placeholder="FLOAT" value="<?php echo $_POST['float']; ?>" class="form-control">
+                                    <input name="float" type="text"  placeholder="FLOAT" value="<?php echo $_POST['float']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="phone" type="tel" placeholder="PHONE" value="<?php echo $_POST['phone']; ?>" class="form-control">
+                                    <input name="phone" type="tel" placeholder="PHONE" value="<?php echo $_POST['phone']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-<input name="email" type="email" placeholder="EMAIL" value="<?php echo $_POST['email']; ?>" class="form-control">
+                                    <input name="email" type="email" placeholder="EMAIL" value="<?php echo $_POST['email']; ?>" class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -121,17 +114,17 @@ if (!isset($sp_test)) :
                                 <div class="col">
                                     <div class="btn-group" data-toggle="buttons">
                                         <label class="btn btn-secondary active">
-<input name="accepted" type="checkbox" checked autocomplete="off"> I agree
+                                            <input name="accepted" type="checkbox" checked autocomplete="off"> I agree
                                         </label>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="btn-group" data-toggle="buttons">
                                         <label class="btn btn-secondary active">
-<input type="radio" name="options" id="option1" autocomplete="off" checked> Radio 1
+                                            <input type="radio" name="options" id="option1" autocomplete="off" checked> Radio 1
                                         </label>
                                         <label class="btn btn-secondary">
-<input type="radio" name="options" id="option2" autocomplete="off"> Radio 2
+                                            <input type="radio" name="options" id="option2" autocomplete="off"> Radio 2
                                         </label>
                                     </div>
                                 </div>
@@ -147,15 +140,15 @@ if (!isset($sp_test)) :
                             </div>
                         </div>
                     </div>
-<input name="subject" type="hidden" value="Subject!">
+                    <input name="subject" type="hidden" value="Subject!">
 <?php
 else :
-    sp_test($sp_test);
+    sp_test($get_page);
 endif;
 ?>
                     <div class="form-row mt-3">
                         <div class="col-12" style="align-self: flex-end">
-<input type="submit" value="Submit" class="btn btn-info w-100">
+                            <input type="submit" value="Submit" class="btn btn-info w-100">
                         </div>
                     </div>
                 </div>
@@ -167,7 +160,7 @@ endif;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (!isset($sp_test)) {
+    if (!isset($get_page)) {
 
         // $sp_valid->set_bail_rev(); // Revers Bail
         // $sp_valid->set_bail_on();  // ALL On Bail
@@ -204,10 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-2 pl-0" style="position: absolute; left: 0; margin-left: 15px;">
+        <div class="col-2 pl-0" style="position: absolute; left: 0; margin-left: 15px;">
 <?php
     if ($sp_valid->status) {
         $class = 'border-success text-success';
@@ -217,34 +207,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $text = 'bool(false)';
     }
 ?>
-                        <div class="rounded text-center mt-3 py-2 border <?php echo $class; ?>">
-                            <span>Status : <?php echo $text; ?></span>
-                        </div>
-                    </div>
-                    <div class="col-2 pl-0" style="margin-right: auto; margin-left: auto;">
-                        <div class="rounded text-center mt-3 py-2 border border-info text-info">
-                            <span><?php echo $page_title; ?></span>
-                        </div>
-                    </div>
+            <div class="rounded text-center mt-3 py-2 border <?php echo $class; ?>">
+                <span>Status : <?php echo $text; ?></span>
+            </div>
+        </div>
 <?php
+    if ($sp_menu) :
+?>
+        <div class="col-2" style="margin-right: auto; margin-left: auto;">
+            <div class="btn-group mt-3 w-100">
+                <button type="button" class="btn btn-info dropdown-toggle py-2 w-100" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <?php echo isset($get_page)? $get_page: $home_title; ?>
+                </button>
+                <div class="dropdown-menu">
+<?php
+        foreach ($sp_menu as $page => $link) :
+            if ($page != 'index') :
+?>
+                    <a class="dropdown-item" href="<?php echo $link; ?>"><?php echo $page; ?></a>
+<?php
+            endif;
+        endforeach;
+
+        if (isset($sp_menu['index'])) :
+?>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="<?php echo $sp_menu['index']; ?>"><?php echo $home_title; ?></a>
+<?php
+        endif;
+?>
+                </div>
+            </div>
+        </div>
+<?php
+    endif;
+
     $class = 'col-12';
     if ($sp_valid->get_auto_test()) :
         $class = 'col-6';
 ?>
-                    <div class="col-2 pl-0" style="position: absolute; right: 0; margin-right: 15px;">
-                        <div class="rounded text-center mt-3 py-2 border border-warning text-warning">
-                            <span>Auto Test : ( ON )</span>
-                        </div>
-                    </div>
+        <div class="col-2 pl-0" style="position: absolute; right: 0; margin-right: 15px;">
+            <div class="rounded text-center mt-3 py-2 border border-warning text-warning">
+                <span>Auto Test : ( ON )</span>
+            </div>
+        </div>
 <?php
     endif;
 ?>
-                </div>
-            </div>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="<?php echo $class; ?> pl-0">
-                        <pre>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="<?php echo $class; ?> pl-0">
+            <pre>
 <?php
 
     dump('get_empties', false);
@@ -254,27 +269,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo '<hr><br>';
 
 ?>
-                        </pre>
-                    </div>
+            </pre>
+        </div>
 <?php
     if ($sp_valid->get_auto_test()) :
 ?>
-                    <div class="<?php echo $class; ?> pl-0">
-                        <pre>
+        <div class="<?php echo $class; ?> pl-0">
+            <pre>
 <?php
 
     dump('get_auto_test', false);
     echo '<hr><br>';
 
 ?>
-                        </pre>
-                    </div>
+            </pre>
+        </div>
 <?php
     endif;
+?>
+    </div>
+</div>
+<?php
+} else {
+?>
+<div class="container-fluid">
+    <div class="row">
+<?php
+    if ($sp_menu) :
+?>
+        <div class="col-2" style="margin-right: auto; margin-left: auto;">
+            <div class="btn-group mt-3 w-100">
+                <button type="button" class="btn btn-info dropdown-toggle py-2 w-100" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <?php echo isset($get_page)? $get_page: $home_title; ?>
+                </button>
+                <div class="dropdown-menu">
+<?php
+        foreach ($sp_menu as $page => $link) :
+            if ($page != 'index') :
+?>
+                    <a class="dropdown-item" href="<?php echo $link; ?>"><?php echo $page; ?></a>
+<?php
+            endif;
+        endforeach;
+
+        if (isset($sp_menu['index'])) :
+?>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="<?php echo $sp_menu['index']; ?>"><?php echo $home_title; ?></a>
+<?php
+        endif;
 ?>
                 </div>
             </div>
         </div>
+<?php
+    endif;
+?>
     </div>
 </div>
 <?php
