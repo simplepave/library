@@ -22,7 +22,7 @@ class SP_Validation {
     private $empties = [];
     private $fields = [];
 
-    private $bail = false;
+    private $bail_rev = false;
     private $bail_on = false;
     private $pullout;
 
@@ -50,8 +50,7 @@ class SP_Validation {
             'date_format' => [1,     'value' => 'Формат: %s',           'example' => 'Y-m-d H:i:s'],
             'confirmed'   => [[2,1], 'value' => 'Не совпадает с "%s".'],
             'email'       => [null,  'value' => 'Не e-mail.',  'other' => '/^.+@.+\..+$/i'],
-            'phone'       => [null,  'value' => 'Не телефон.',
-                                                'other' => '/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?[\d-_\s]{7,14}$/'],
+            'phone'       => [null,  'value' => 'Не телефон.', 'other' =>'/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?[\d-_\s]{7,14}$/'],
             'type'        => [[2,1]],
             'title'       => [1],
         ];
@@ -69,7 +68,7 @@ class SP_Validation {
                 $this->_value = $this->name_isset();
                 $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '|'));
 
-                $bail = $this->bail? !in_array('bail', $variables): in_array('bail', $variables);
+                $bail = $this->bail_rev? !in_array('bail', $variables): in_array('bail', $variables);
                 $bail = $this->bail_on || $bail;
 
                 if (in_array('required', $variables)) $this->validate('required');
@@ -105,6 +104,7 @@ class SP_Validation {
                             if ($this->_params) $this->validate($key);
                         }
                         else {
+
                             if (isset($this->validate[$key]['other']))
                                 $this->_params = (array)$this->validate[$key]['other'];
 
@@ -112,6 +112,7 @@ class SP_Validation {
                         }
                     }
                 }
+
                 if ($this->pullout) $this->group($items);
             }
         }
@@ -123,7 +124,7 @@ class SP_Validation {
 
     public function set_bail_rev()
     {
-        $this->bail = true;
+        $this->bail_rev = true;
     }
 
     public function set_bail_on()
