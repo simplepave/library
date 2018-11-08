@@ -56,7 +56,7 @@ $view = 'view-default';
  *   |required|    = required
  *
  *   |required|accepted|
- *   |string|max:255|min:3|confirmed:name[,title]|
+ *   |string|min:3|max:255|confirmed:name[,title]|
  *   |numeric|between:0,99|
  *   |date|date_format:Y-m-d H:i:s|
  *   |regex:/^.+$/i ( \| === | )|float|email|phone|
@@ -164,8 +164,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // $sp_valid->set_bail_rev(); // Revers Bail
     // $sp_valid->set_bail_on();  // ALL On Bail
 
+    $sp_valid->set_auto_test([
+        'string'      => 'String str',
+        'numeric'     => '3',
+        'float'       => '47,10',
+        'confirmed'   => 'user@user.com',
+        'regex'       => 'http://site.com',
+        'date_format' => '15.12.2013',
+        'phone'       => '+71112223344',
+        'email'       => 'user@user.com',
+    ]);
+
     $validation = $sp_valid->validation([
-        'string'      => 'bail|group:string|min:3|max:7',
+        'string'      => 'bail|group:string|min:3|max:13',
         'numeric'     => 'numeric|between:3,7|type:int',
         'float'       => 'float|type:float',
         'confirmed'   => 'required|confirmed:email,E-mail',
@@ -188,22 +199,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="col-2 pl-0">
 <?php
     if ($sp_valid->status) {
-        $class = ' bg-success text-white';
+        $class = 'border-success text-success';
         $text = 'bool(true)';
     } else {
-        $class = ' bg-danger text-white';
+        $class = 'border-danger text-danger';
         $text = 'bool(false)';
     }
 ?>
-                        <div class="rounded text-center mt-3 py-2<?php echo $class; ?>">
+                        <div class="rounded text-center mt-3 py-2 border <?php echo $class; ?>">
                             <span>Status : <?php echo $text; ?></span>
                         </div>
                     </div>
+<?php
+    $class = 'col-12';
+    if ($sp_valid->get_auto_test()) :
+        $class = 'col-6';
+?>
+                    <div class="col-2 pl-0" style="position: absolute; right: 0; margin-right: 15px;">
+                        <div class="rounded text-center mt-3 py-2 border border-warning text-warning">
+                            <span>Auto Test : ( ON )</span>
+                        </div>
+                    </div>
+<?php
+    endif;
+?>
                 </div>
             </div>
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-12 pl-0">
+                    <div class="<?php echo $class; ?> pl-0">
                         <pre>
 <?php
 
@@ -212,16 +236,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     dump('get_fields');
 
     echo '<hr><br>';
-}
+
 ?>
                         </pre>
                     </div>
+<?php
+    if ($sp_valid->get_auto_test()) :
+?>
+                    <div class="<?php echo $class; ?> pl-0">
+                        <pre>
+<?php
+
+    dump('get_auto_test', false);
+    echo '<hr><br>';
+
+?>
+                        </pre>
+                    </div>
+<?php
+    endif;
+?>
                 </div>
             </div>
         </div>
     </div>
 </div>
 <?php
-
+}
 require_once(ABSPATH . 'inc/' . $view . '/footer-default.php');
 endif;

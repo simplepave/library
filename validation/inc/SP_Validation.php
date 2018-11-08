@@ -24,6 +24,7 @@ class SP_Validation {
 
     private $bail_rev = false;
     private $bail_on = false;
+    private $auto_test = false;
     private $pullout;
 
     public $status = true;
@@ -133,6 +134,16 @@ class SP_Validation {
     }
 
     /**
+     * Set Auto Test
+     */
+
+    public function set_auto_test($data = false)
+    {
+        if (is_array($data))
+            $this->auto_test = $data;
+    }
+
+    /**
      * Get Response
      */
 
@@ -151,6 +162,11 @@ class SP_Validation {
         return $this->status? $this->fields: false;
     }
 
+    public function get_auto_test()
+    {
+        return $this->auto_test?: false;
+    }
+
     /**
      * Helper Methods
      */
@@ -159,6 +175,9 @@ class SP_Validation {
     {
         $name = $request?: $this->_name;
         $field = isset($_POST[$name])? trim($_POST[$name]): false;
+
+        if ($this->auto_test && array_key_exists($name, $this->auto_test))
+            $field = $this->auto_test[$name];
 
         if (!$request && $this->pullout)
             $this->fields['all'][$name]['value'] = $field;
@@ -218,9 +237,9 @@ class SP_Validation {
             $type = $this->_params[0];
 
             switch ($type) {
-                case 'int':    $value = (int)$value; break;
-                case 'bool':   $value = (bool)$value; break;
-                case 'float':  $value = (float)str_replace(',', '.', $value); break;
+                case 'int':   $value = (int)$value; break;
+                case 'bool':  $value = (bool)$value; break;
+                case 'float': $value = (float)str_replace(',', '.', $value); break;
                 case 'array':
                     if (isset($this->_params[1])) {
                         $sep = $this->_params[1];
@@ -242,7 +261,7 @@ class SP_Validation {
 
     private function validate_required()
     {
-        return $this->_value !== '0' && empty($this->_value);
+        return empty($this->_value) && $this->_value !== '0';
     }
 
     /**

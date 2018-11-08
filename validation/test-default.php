@@ -34,10 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // $sp_valid->set_bail_rev(); // Revers Bail
     // $sp_valid->set_bail_on();  // ALL On Bail
 
+    // $sp_valid->set_auto_test([
+    //     'subject' => 'Subject',
+    //     'phone'   => '+71112223344',
+    //     'email'   => 'user@user.com',
+    // ]);
+
     /**
      * bail | group:key[,key...]( not | ) | title:title
      * required | accepted
-     * max:255 | min:3 | confirmed:name[,title]
+     * min:3 | max:255 | confirmed:name[,title]
      * numeric | between:0,99
      * date | date_format:Y-m-d H:i:s
      * regex:/^.+$/i ( \| === | ) | float | email | phone
