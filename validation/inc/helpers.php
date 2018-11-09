@@ -19,13 +19,21 @@ if (!function_exists('dump')) {
         global $sp_valid;
 
         if ($res = $sp_valid->$name()) {
-            echo '<hr><br>';
-            echo $name;
+
+            switch ($name) {
+                case 'get_errors':    $class = 'text-danger'; break;
+                case 'get_fields':    $class = 'text-success'; break;
+                case 'get_auto_test': $class = 'text-warning'; break;
+                default: $class = 'text-white'; break;
+            }
+
+            echo '<hr>';
+            echo '<div class="border border-secondary d-inline-block bg-dark py-1 px-2 rounded ' . $class . '">' . $name . '</div>';
             echo '<br><br>';
+
             if ($print == 'var_dump')
                 var_dump($res);
             else print_r($res);
-            echo '<br>';
         }
     }
 }

@@ -40,15 +40,15 @@ class SP_Validation {
         $this->validate = [
             'required'    => [false, 'value' => 'Обязательное поле.'],
             'accepted'    => [null,  'value' => 'Подтвердить выбор.'],
-            'max'         => [1,     'value' => 'Больше чем %s симв.',  'default' => 255],
-            'min'         => [1,     'value' => 'Минимум %s симв.',     'default' => 3],
+            'max'         => [1,     'value' => 'Больше чем %s симв.', 'default' => 255],
+            'min'         => [1,     'value' => 'Минимум %s симв.',    'default' => 3],
             'numeric'     => [null,  'value' => 'Не число.'],
-            'float'       => [null,  'value' => 'Не float.',            'other' => '/^\d+(\.|\,)\d+$/'],
-            'between'     => [2,     'value' => 'Не между %s и %s.',    'default' => [0,99]],
+            'float'       => [null,  'value' => 'Не float.',           'other' => '/^\d+(\.|\,)\d+$/'],
+            'between'     => [2,     'value' => 'Не между %s и %s.',   'default' => [0,99]],
             'string'      => [null,  'value' => 'Не строка.'],
             'regex'       => [1,     'value' => 'Ошибочный формат.'],
             'date'        => [null,  'value' => 'Не является датой.'],
-            'date_format' => [1,     'value' => 'Формат: %s',           'example' => 'Y-m-d H:i:s'],
+            'date_format' => [1,     'value' => 'Формат: %s',          'example' => 'Y-m-d H:i:s'],
             'confirmed'   => [[2,1], 'value' => 'Не совпадает с "%s".'],
             'email'       => [null,  'value' => 'Не e-mail.',  'other' => '/^.+@.+\..+$/i'],
             'phone'       => [null,  'value' => 'Не телефон.', 'other' =>'/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?[\d-_\s]{7,14}$/'],
@@ -157,9 +157,15 @@ class SP_Validation {
         return $this->empties?: false;
     }
 
-    public function get_fields()
+    public function get_fields($key = false)
     {
-        return $this->status? $this->fields: false;
+        if ($this->status || $key === 'all')
+            if ($key && isset($this->fields[$key]))
+                return $this->fields[$key];
+            else
+                return $this->fields;
+
+        return false;
     }
 
     public function get_auto_test()

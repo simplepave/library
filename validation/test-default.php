@@ -10,18 +10,12 @@
  * info@simplepave.ru
  */
 
-?>
-    <input name="phone"   type="tel"    value="<?php echo $_POST['phone']; ?>" placeholder="PHONE">
-    <input name="email"   type="email"  value="<?php echo $_POST['email']; ?>" placeholder="EMAIL">
-    <input name="subject" type="hidden" value="Subject!">
-<?php
-
     // $sp_valid->set_bail_rev(); // Revers Bail
     // $sp_valid->set_bail_on();  // ALL On Bail
 
     // $sp_valid->set_auto_test([
     //     'subject' => 'Subject',
-    //     'phone'   => '+71112223344',
+    //     'phone'   => '+11112223344',
     //     'email'   => 'user@user.com',
     // ]);
 
@@ -46,11 +40,46 @@
      */
 
     $validation = $sp_valid->validation([
-        'subject' => 'required|group:mail',
-        'phone'   => 'bail|required|group:mail|phone|max:25',
-        'email'   => 'bail|required|group:mail|email|max:100',
+        'subject' => 'title:Subject - |group:mail',
+        'phone'   => 'title:Tel : |bail|required|group:mail|phone|max:25',
+        'email'   => 'title:E-mail : |bail|required|group:mail|email|max:100',
     ]);
 
     // $sp_valid->get_empties()
     // $sp_valid->get_errors()
     // $sp_valid->get_fields()
+
+    $fields = $sp_valid->get_fields('all');
+?>
+
+<!-- Form -->
+
+<div class="form-row">
+    <div class="col">
+        <input name="phone" type="tel" value="<?php echo $fields['phone']['value']; ?>" placeholder="PHONE" class="form-control my-phone-mask">
+    </div>
+    <div class="col">
+        <input name="email" type="email" value="<?php echo $fields['email']['value']; ?>" placeholder="EMAIL" class="form-control">
+    </div>
+    <div class="col">
+        <input name="subject" type="text" value="<?php echo $fields['subject']['value']; ?>" placeholder="SUBJECT" class="form-control">
+    </div>
+</div>
+
+<!-- End Form -->
+
+<script type="text/javascript">
+    jQuery(document).ready(function($){
+
+        /**
+         * Phone
+         */
+
+        $('.my-phone-mask').inputmask({
+            mask: '+9 (999) 999-99-99',
+            clearMaskOnLostFocus: true,
+            clearIncomplete: true
+        });
+
+    });
+</script>

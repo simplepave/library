@@ -77,35 +77,68 @@ require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
                 <div class="container-fluid px-0">
 <?php
 if (!isset($get_page)) :
+
+    // $sp_valid->set_bail_rev(); // Revers Bail
+    // $sp_valid->set_bail_on();  // ALL On Bail
+
+    // $sp_valid->set_auto_test([
+    //     'string'      => 'String str',
+    //     'numeric'     => '3',
+    //     'float'       => '47,10',
+    //     'confirmed'   => 'user@user.com',
+    //     'regex'       => 'http://site.com',
+    //     'date_format' => '15.12.2013',
+    //     'phone'       => '+11112223344',
+    //     'email'       => 'user@user.com',
+    //     'accepted'    => '1',
+    //     'select'      => 'city2',
+    // ]);
+
+    $validation = $sp_valid->validation([
+        'string'      => 'bail|group:string|min:3|max:11',
+        'numeric'     => 'numeric|between:3,7|type:int',
+        'float'       => 'float|type:float',
+        'confirmed'   => 'required|confirmed:email,E-mail',
+        'regex'       => 'regex:/^https?:\/\/\S*?\.\S*?$/',
+        'date_format' => 'date_format:d.m.Y',
+        'phone'       => 'phone|max:25',
+        'email'       => 'email|max:100',
+        'subject'     => 'group:string',
+        'accepted'    => 'accepted|group:take',
+        'options'     => 'group:take',
+        'select'      => 'title:Select City|group:state',
+    ]);
+
+    $fields = $sp_valid->get_fields('all');
 ?>
                     <div class="form-row justify-content-start">
                         <div class="col-9">
                             <div class="form-row mb-3">
                                 <div class="col-3">
-                                    <input name="string" type="text" placeholder="STRING" value="<?php echo $_POST['string']; ?>" class="form-control">
+                                    <input name="string" type="text" placeholder="STRING" value="<?php echo $fields['string']['value']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-                                    <input name="numeric" type="text" placeholder="NUMERIC" value="<?php echo $_POST['numeric']; ?>" class="form-control">
+                                    <input name="numeric" type="text" placeholder="NUMERIC" value="<?php echo $fields['numeric']['value']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-                                    <input name="date_format" type="text" placeholder="DATE_FORMAT" value="<?php echo $_POST['date_format']; ?>" class="form-control">
+                                    <input name="date_format" type="text" placeholder="DATE_FORMAT" value="<?php echo $fields['date_format']['value']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-                                    <input name="confirmed" type="text"  placeholder="CONFIRMED" value="<?php echo $_POST['confirmed']; ?>" class="form-control">
+                                    <input name="confirmed" type="text"  placeholder="CONFIRMED" value="<?php echo $fields['confirmed']['value']; ?>" class="form-control">
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="col-3">
-                                    <input name="regex" type="text"  placeholder="REGEX: http://site.com" value="<?php echo $_POST['regex']; ?>" class="form-control">
+                                    <input name="regex" type="text"  placeholder="REGEX: http://site.com" value="<?php echo $fields['regex']['value']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-                                    <input name="float" type="text"  placeholder="FLOAT" value="<?php echo $_POST['float']; ?>" class="form-control">
+                                    <input name="float" type="text"  placeholder="FLOAT" value="<?php echo $fields['float']['value']; ?>" class="form-control">
                                 </div>
                                 <div class="col-3">
-                                    <input name="phone" type="tel" placeholder="PHONE" value="<?php echo $_POST['phone']; ?>" class="form-control">
+                                    <input name="phone" type="tel" placeholder="PHONE" value="<?php echo $fields['phone']['value']; ?>" class="form-control phone-mask">
                                 </div>
                                 <div class="col-3">
-                                    <input name="email" type="email" placeholder="EMAIL" value="<?php echo $_POST['email']; ?>" class="form-control">
+                                    <input name="email" type="email" placeholder="EMAIL" value="<?php echo $fields['email']['value']; ?>" class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -113,18 +146,18 @@ if (!isset($get_page)) :
                             <div class="form-row mb-2">
                                 <div class="col">
                                     <div class="btn-group" data-toggle="buttons">
-                                        <label class="btn btn-secondary active">
-                                            <input name="accepted" type="checkbox" checked autocomplete="off"> I agree
+                                        <label class="btn btn-secondary<?php echo $fields['accepted']['value']? ' active': ''; ?>">
+                                            <input name="accepted" type="checkbox" autocomplete="off"<?php echo $fields['accepted']['value']? ' checked': ''; ?>> I agree
                                         </label>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="btn-group" data-toggle="buttons">
-                                        <label class="btn btn-secondary active">
-                                            <input type="radio" name="options" id="option1" autocomplete="off" checked> Radio 1
+                                        <label class="btn btn-secondary<?php echo $fields['options']['value'] == 'radio1'? ' active': ''; ?>">
+                                            <input name="options" type="radio" value="radio1" autocomplete="off"<?php echo $fields['options']['value'] == 'radio1'? ' checked': ''; ?>> Radio 1
                                         </label>
-                                        <label class="btn btn-secondary">
-                                            <input type="radio" name="options" id="option2" autocomplete="off"> Radio 2
+                                        <label class="btn btn-secondary<?php echo $fields['options']['value'] == 'radio2'? ' active': ''; ?>">
+                                            <input name="options" type="radio" value="radio2" autocomplete="off"<?php echo $fields['options']['value'] == 'radio2'? ' checked': ''; ?>> Radio 2
                                         </label>
                                     </div>
                                 </div>
@@ -132,9 +165,9 @@ if (!isset($get_page)) :
                             <div class="form-row align-items-center">
                                 <div class="col">
                                     <select name="select" class="form-control custom-select">
-                                        <option value="city1" selected>City One</option>
-                                        <option value="city2">City Two</option>
-                                        <option value="city3">City Three</option>
+                                        <option value="city1"<?php echo $fields['select']['value'] == 'city1'? ' selected': ''; ?>>City One</option>
+                                        <option value="city2"<?php echo $fields['select']['value'] == 'city2'? ' selected': ''; ?>>City Two</option>
+                                        <option value="city3"<?php echo $fields['select']['value'] == 'city3'? ' selected': ''; ?>>City Three</option>
                                     </select>
                                 </div>
                             </div>
@@ -148,7 +181,7 @@ endif;
 ?>
                     <div class="form-row mt-3">
                         <div class="col-12" style="align-self: flex-end">
-                            <input type="submit" value="Submit" class="btn btn-info w-100">
+                            <input type="submit" value="Submit" class="progress-bar-striped btn btn-secondary w-100">
                         </div>
                     </div>
                 </div>
@@ -159,40 +192,6 @@ endif;
 <?php
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    if (!isset($get_page)) {
-
-        // $sp_valid->set_bail_rev(); // Revers Bail
-        // $sp_valid->set_bail_on();  // ALL On Bail
-
-        // $sp_valid->set_auto_test([
-        //     'string'      => 'String str',
-        //     'numeric'     => '3',
-        //     'float'       => '47,10',
-        //     'confirmed'   => 'user@user.com',
-        //     'regex'       => 'http://site.com',
-        //     'date_format' => '15.12.2013',
-        //     'phone'       => '+71112223344',
-        //     'email'       => 'user@user.com',
-        //     'select'      => 'city2',
-        // ]);
-
-        $validation = $sp_valid->validation([
-            'string'      => 'bail|group:string|min:3|max:13',
-            'numeric'     => 'numeric|between:3,7|type:int',
-            'float'       => 'float|type:float',
-            'confirmed'   => 'required|confirmed:email,E-mail',
-            'regex'       => 'regex:/^https?:\/\/\S*?\.\S*?$/|type:float',
-            'date_format' => 'date_format:d.m.Y',
-            'phone'       => 'phone|max:25',
-            'email'       => 'email|max:100|type:array,@',
-            'subject'     => 'group:string',
-            'accepted'    => 'accepted|group:take',
-            'options'     => 'group:take',
-            'select'      => 'title:Select City|group:state',
-        ]);
-
-    }
 
 ?>
 <div class="container-fluid">
@@ -266,30 +265,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container-fluid">
     <div class="row">
         <div class="<?php echo $class; ?>">
-            <pre>
+            <pre class="mb-0">
 <?php
 
     dump('get_empties', false);
     dump('get_errors', false);
     dump('get_fields');
 
-    echo '<hr><br>';
-
 ?>
-            </pre>
+            <hr></pre>
         </div>
 <?php
     if ($sp_valid->get_auto_test()) :
 ?>
         <div class="<?php echo $class; ?>">
-            <pre>
+            <pre class="mb-0">
 <?php
 
     dump('get_auto_test', false);
-    echo '<hr><br>';
 
 ?>
-            </pre>
+            <hr></pre>
         </div>
 <?php
     endif;
