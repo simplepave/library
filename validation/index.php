@@ -11,6 +11,7 @@
  */
 
 $view = 'view-default';
+$start_auto_test = 0;
 
 define('ABSPATH', dirname(__FILE__) . '/');
 
@@ -56,16 +57,24 @@ $home_title = get_class($sp_valid);
 $sp_menu = [];
 $filelist = glob('*.php');
 
-foreach ($filelist as $file) {
-    $file = rtrim($file, '.php');
-    if ($file == 'index')
-        $sp_menu[$file] = $_SERVER['PHP_SELF'];
-    else
-        $sp_menu[$file] = $_SERVER['PHP_SELF'] . '?page=' . $file;
+$parse_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path_arr = explode('/', trim($parse_path, '/'));
+
+$get_page = false;
+$path_end = end($path_arr);
+
+if ($path_end && in_array($path_end . '.php', $filelist)) {
+    array_pop($path_arr);
+    $get_page = $path_end != 'index'? $path_end: false;
 }
 
-if (isset($_GET['page']))
-    $get_page = $_GET['page'];
+$get_path = implode('/', $path_arr);
+$get_path = $get_path? '/' . $get_path: '';
+
+foreach ($filelist as $file) {
+    $file = rtrim($file, '.php');
+    $sp_menu[$file] = $get_path . '/' . $file;
+}
 
 require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
 
@@ -76,23 +85,24 @@ require_once(ABSPATH . 'inc/' . $view . '/header-default.php');
             <form id="" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
                 <div class="container-fluid px-0">
 <?php
-if (!isset($get_page)) :
+if (!$get_page) :
 
     // $sp_valid->set_bail_rev(); // Revers Bail
     // $sp_valid->set_bail_on();  // ALL On Bail
 
-    // $sp_valid->set_auto_test([
-    //     'string'      => 'String str',
-    //     'numeric'     => '3',
-    //     'float'       => '47,10',
-    //     'confirmed'   => 'user@user.com',
-    //     'regex'       => 'http://site.com',
-    //     'date_format' => '15.12.2013',
-    //     'phone'       => '+11112223344',
-    //     'email'       => 'user@user.com',
-    //     'accepted'    => '1',
-    //     'select'      => 'city2',
-    // ]);
+    if ($start_auto_test)
+        $sp_valid->set_auto_test([
+            'string'      => 'String str',
+            'numeric'     => '3',
+            'float'       => '47,10',
+            'confirmed'   => 'user@user.com',
+            'regex'       => 'http://site.com',
+            'date_format' => '15.12.2013',
+            'phone'       => '+11112223344',
+            'email'       => 'user@user.com',
+            'accepted'    => '1',
+            'select'      => 'city2',
+        ]);
 
     $validation = $sp_valid->validation([
         'string'      => 'bail|group:string|min:3|max:11',
@@ -216,12 +226,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-2 pl-0" style="margin-right: auto; margin-left: auto;">
             <div class="btn-group mt-3 w-100">
 <?php
-        if (isset($get_page))
-            $link = isset($sp_menu[$get_page])? $sp_menu[$get_page]: false;
+        if ($get_page)
+            $link = isset($sp_menu[$get_page])? $sp_menu[$get_page]: '#';
         else
-            $link = isset($sp_menu['index'])? $sp_menu['index']: false;
+            $link = isset($sp_menu['index'])? $sp_menu['index']: '#';
 ?>
-                    <a class="btn btn-info w-100" href="<?php echo  $link; ?>"><?php echo isset($get_page)? $get_page: $home_title; ?></a>
+                    <a class="btn btn-info w-100" href="<?php echo  $link; ?>"><?php echo $get_page? $get_page: $home_title; ?></a>
                     <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split py-2 active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="sr-only">Toggle Dropdown</span>
                     </button>
@@ -248,9 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php
     endif;
 
-    $class = 'col-12';
     if ($sp_valid->get_auto_test()) :
-        $class = 'col-6';
 ?>
         <div class="col-2 pl-0" style="position: absolute; right: 0;">
             <div class="rounded text-center mt-3 py-2 border border-warning text-warning">
@@ -264,26 +272,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 <div class="container-fluid">
     <div class="row">
-        <div class="<?php echo $class; ?>">
+        <div class="col">
             <pre class="mb-0">
 <?php
-
-    dump('get_empties', false);
-    dump('get_errors', false);
-    dump('get_fields');
-
+                dump('get_errors', false);
+                dump('get_fields');
 ?>
             <hr></pre>
         </div>
 <?php
-    if ($sp_valid->get_auto_test()) :
+    if ($sp_valid->get_empties()) :
 ?>
-        <div class="<?php echo $class; ?>">
+        <div class="col">
             <pre class="mb-0">
 <?php
+                dump('get_empties', false);
+?>
+            <hr></pre>
+        </div>
+<?php
+    endif;
 
-    dump('get_auto_test', false);
-
+    if ($sp_valid->get_auto_test()) :
+?>
+        <div class="col">
+            <pre class="mb-0">
+<?php
+                dump('get_auto_test', false);
 ?>
             <hr></pre>
         </div>
@@ -303,12 +318,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-2 pl-0" style="margin-right: auto; margin-left: auto;">
             <div class="btn-group mt-3 w-100">
 <?php
-        if (isset($get_page))
-            $link = isset($sp_menu[$get_page])? $sp_menu[$get_page]: false;
+        if ($get_page)
+            $link = isset($sp_menu[$get_page])? $sp_menu[$get_page]: '#';
         else
-            $link = isset($sp_menu['index'])? $sp_menu['index']: false;
+            $link = isset($sp_menu['index'])? $sp_menu['index']: '#';
 ?>
-                    <a class="btn btn-info w-100" href="<?php echo  $link; ?>"><?php echo isset($get_page)? $get_page: $home_title; ?></a>
+                    <a class="btn btn-info w-100" href="<?php echo  $link; ?>"><?php echo $get_page? $get_page: $home_title; ?></a>
                     <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split py-2 active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="sr-only">Toggle Dropdown</span>
                     </button>
