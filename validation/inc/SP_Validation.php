@@ -25,6 +25,7 @@ class SP_Validation {
     private $bail_rev = false;
     private $bail_on = false;
     private $auto_test = false;
+    private $auto_test_off = false;
     private $pullout;
 
     public $status = true;
@@ -33,9 +34,10 @@ class SP_Validation {
      * Construct
      */
 
-    public function __construct($pullout = true)
+    public function __construct($pullout = true, $auto_test_off = false)
     {
         $this->pullout = $pullout;
+        $this->auto_test_off = $auto_test_off;
 
         $this->validate = [
             'required'    => [false, 'value' => 'Обязательное поле.'],
@@ -182,7 +184,7 @@ class SP_Validation {
         $name = $request?: $this->_name;
         $field = isset($_POST[$name])? trim($_POST[$name]): false;
 
-        if ($this->auto_test && array_key_exists($name, $this->auto_test))
+        if (!$this->auto_test_off && $this->auto_test && array_key_exists($name, $this->auto_test))
             $field = $this->auto_test[$name];
 
         if (!$request && $this->pullout)

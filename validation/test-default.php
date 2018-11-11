@@ -49,20 +49,20 @@
     // $sp_valid->get_errors()
     // $sp_valid->get_fields()
 
-    $fields = $sp_valid->get_fields('all');
+    $_form = sp_form();
 ?>
 
 <!-- Form -->
 
 <div class="form-row">
     <div class="col">
-        <input name="phone" type="tel" value="<?php echo $fields['phone']['value']; ?>" placeholder="PHONE" class="form-control my-phone-mask">
+        <input name="phone" type="tel" value="<?php echo $_form['phone']; ?>" placeholder="PHONE" class="form-control my-phone-mask">
     </div>
     <div class="col">
-        <input name="email" type="email" value="<?php echo $fields['email']['value']; ?>" placeholder="EMAIL" class="form-control">
+        <input name="email" type="email" value="<?php echo $_form['email']; ?>" placeholder="EMAIL" class="form-control">
     </div>
     <div class="col">
-        <input name="subject" type="text" value="<?php echo $fields['subject']['value']; ?>" placeholder="SUBJECT" class="form-control">
+        <input name="subject" type="text" value="<?php echo $_form['subject']; ?>" placeholder="SUBJECT" class="form-control">
     </div>
 </div>
 

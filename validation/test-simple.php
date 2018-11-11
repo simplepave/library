@@ -15,12 +15,12 @@
         'email'   => 'title:E-mail : |bail|required|group:mail|email|max:100',
     ]);
 
-    $fields = $sp_valid->get_fields('all');
+    $_form = sp_form();
 ?>
 
 
-    <input name="phone"   type="tel"    value="<?php echo $fields['phone']['value']; ?>" placeholder="PHONE" class="my-phone-mask">
-    <input name="email"   type="email"  value="<?php echo $fields['email']['value']; ?>" placeholder="EMAIL">
+    <input name="phone"   type="tel"    value="<?php echo $_form['phone']; ?>" placeholder="PHONE" class="my-phone-mask">
+    <input name="email"   type="email"  value="<?php echo $_form['email']; ?>" placeholder="EMAIL">
     <input name="subject" type="hidden" value="Subject!">
 
 
