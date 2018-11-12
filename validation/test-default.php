@@ -20,7 +20,8 @@
     // ]);
 
     /**
-     * bail | group:key[,key...]( not | ) | title:title
+     * bail | title:title
+     * group:key[,key...]( not == |, all, title )
      * required | accepted
      * min:3 | max:255 | confirmed:name[,title]
      * numeric | between:0,99
@@ -40,16 +41,19 @@
      */
 
     $validation = $sp_valid->validation([
-        'subject' => 'title:Subject - |group:mail',
-        'phone'   => 'title:Tel : |bail|required|group:mail|phone|max:25',
-        'email'   => 'title:E-mail : |bail|required|group:mail|email|max:100',
+        'subject' => 'title:Subject -|group:mail',
+        'phone'   => 'title:Tel :|bail|required|group:mail|phone|max:25',
+        'email'   => 'title:E-mail :|bail|required|group:mail|email|max:100',
     ]);
 
-    // $sp_valid->get_empties()
+    /* $sp_valid->status */
+
     // $sp_valid->get_errors()
+    // $sp_valid->get_empties()
     // $sp_valid->get_fields()
 
-    $_form = sp_form();
+    $_form = $sp_valid->get_form();
+
 ?>
 
 <!-- Form -->

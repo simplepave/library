@@ -50,6 +50,9 @@
             .sp-dropdown:hover > .dropdown-menu {
                 display: block;
             }
+            .sp-table tr:first-child td {
+                border-top: none;
+            }
         </style>
 
         <script src="/validation/inc/view-default/js/jquery-3.3.1.slim.min.js"></script>

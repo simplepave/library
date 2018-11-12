@@ -1,4 +1,4 @@
-<?php if (!defined('ABSPATH')) exit('No direct script access allowed');
+<?php // if (!defined('ABSPATH')) exit('No direct script access allowed');
 
 /**
  * Project: Validation
@@ -21,12 +21,13 @@ class SP_Validation {
     private $errors = [];
     private $empties = [];
     private $fields = [];
+    private $form = [];
+    private $auto_test = [];
 
+    private $pullout;
+    private $auto_test_on = false;
     private $bail_rev = false;
     private $bail_on = false;
-    private $auto_test = false;
-    private $auto_test_off = false;
-    private $pullout;
 
     public $status = true;
 
@@ -34,10 +35,10 @@ class SP_Validation {
      * Construct
      */
 
-    public function __construct($pullout = true, $auto_test_off = false)
+    public function __construct($pullout = true, $auto_test_on = false)
     {
         $this->pullout = $pullout;
-        $this->auto_test_off = $auto_test_off;
+        $this->auto_test_on = $auto_test_on;
 
         $this->validate = [
             'required'    => [false, 'value' => 'Обязательное поле.'],
@@ -56,6 +57,8 @@ class SP_Validation {
             'phone'       => [null,  'value' => 'Не телефон.', 'other' =>'/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?[\d-_\s]{7,14}$/'],
             'type'        => [[2,1]],
             'title'       => [1],
+            // parse_url() PHP_URL_SCHEME, PHP_URL_HOST, PHP_URL_PORT, PHP_URL_USER,
+            //             PHP_URL_PASS, PHP_URL_PATH, PHP_URL_QUERY, PHP_URL_FRAGMENT
         ];
     }
 
@@ -141,22 +144,31 @@ class SP_Validation {
 
     public function set_auto_test($data = false)
     {
-        if (is_array($data))
-            $this->auto_test = $data;
+        if (is_array($data)) {
+            if ($this->auto_test_on)
+                $this->auto_test = $data;
+            else
+                $this->auto_test = true;
+        }
     }
 
     /**
      * Get Response
      */
 
+    public function get_empties()
+    {
+        return $this->empties?: false;
+    }
+
     public function get_errors()
     {
         return $this->errors?: false;
     }
 
-    public function get_empties()
+    public function get_form()
     {
-        return $this->empties?: false;
+        return $this->form?: false;
     }
 
     public function get_fields($key = false)
@@ -184,14 +196,18 @@ class SP_Validation {
         $name = $request?: $this->_name;
         $field = isset($_POST[$name])? trim($_POST[$name]): false;
 
-        if (!$this->auto_test_off && $this->auto_test && array_key_exists($name, $this->auto_test))
+        if ($this->auto_test_on && $this->auto_test && array_key_exists($name, $this->auto_test))
             $field = $this->auto_test[$name];
 
-        if (!$request && $this->pullout)
-            $this->fields['all'][$name]['value'] = $field;
+        if (!$request) {
+            $this->form[$name] = $field;
 
-        if (!$request && is_bool($field))
-            $this->empties[] = $name;
+            if ($this->pullout)
+                $this->fields['all'][$name] = $field;
+
+            if (is_bool($field))
+                $this->empties[] = $name;
+        }
 
         return $field;
     }
@@ -203,7 +219,9 @@ class SP_Validation {
             $name = $this->_name;
 
             foreach ($groups as $group) {
-                if ($group = str_replace(' ', '', $group))
+                $group = str_replace(' ', '', $group);
+
+                if (!in_array($group, ['all', 'title']))
                     $this->fields[$group][$name] = $this->fields['all'][$name];
             }
         }
@@ -257,7 +275,7 @@ class SP_Validation {
                 break;
             }
 
-            $this->fields['all'][$this->_name]['value'] = $value;
+            $this->fields['all'][$this->_name] = $value;
         }
 
         return false;
@@ -428,7 +446,7 @@ class SP_Validation {
     public function validate_title()
     {
         if ($this->pullout)
-            $this->fields['all'][$this->_name]['title'] = $this->_params[0];
+            $this->fields['title'][$this->_name] = $this->_params[0];
 
         return false;
     }

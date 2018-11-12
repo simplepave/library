@@ -55,7 +55,7 @@ jQuery(document).ready(function($){
      * Phone
      */
 
-    var phonemask = $('.phone-mask');
+    let phonemask = $('.phone-mask');
 
     if (phonemask.length)
         phonemask.inputmask({
@@ -63,5 +63,4 @@ jQuery(document).ready(function($){
             clearMaskOnLostFocus: true,
             clearIncomplete: true
         });
-
 });

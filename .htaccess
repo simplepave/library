@@ -1,6 +1,0 @@
-RewriteEngine on
-RewriteCond %{REQUEST_URI} !^validation
-RewriteRule ^(.*)$ validation/$1 [L]
-
-# RewriteRule ^$ validation/ [L]
-# RewriteRule ((?s).*) validation/$1 [L]
