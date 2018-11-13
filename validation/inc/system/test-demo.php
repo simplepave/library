@@ -11,7 +11,7 @@
  */
 
     // $sp_valid->set_bail_rev(); // Revers Bail
-    // $sp_valid->set_bail_on();  // ALL On Bail
+    // $sp_valid->set_bail_all(); // ALL On Bail
 
     $sp_valid->set_auto_test([
         'string'      => 'String str',
@@ -22,7 +22,7 @@
         'date_format' => '15.12.2013',
         'phone'       => '+11112223344',
         'email'       => 'user@user.com',
-        'accepted'    => '1',
+        'accepted'    => 'on',
         'select'      => 'city2',
     ]);
 
@@ -31,7 +31,7 @@
         'numeric'     => 'group:numeric|numeric|type:int|between:3,7',
         'float'       => 'required|group:numeric|float|type:float',
         'confirmed'   => 'required|confirmed:email,E-mail',
-        'regex'       => 'group:outer|regex:/^https?:\/\/\S*?\.\S*?$/|parse_url:PHP_URL_PATH',
+        'regex'       => 'group:outer|regex:/^https?:\/\/\S*?\.\S*?$/|parse_url:host',
         'date_format' => 'group:outer|required|date_format:d.m.Y|type:array,.',
         'phone'       => 'group:outer|required|phone:format|max:25',
         'email'       => 'group:outer|required|email|max:100|type:array,@',

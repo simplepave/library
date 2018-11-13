@@ -1,7 +1,7 @@
 <?php
 
     // $sp_valid->set_bail_rev();
-    // $sp_valid->set_bail_on();
+    // $sp_valid->set_bail_all();
 
     $sp_valid->set_auto_test([
         'subject' => 'Subject test',

@@ -52,7 +52,7 @@
             <form id="sp-form" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
                 <div class="container-fluid px-0">
 <?php
-    sp_test($get_page?: 'inc/system/test-info');
+    sp_test($get_page?: 'inc/system/test-demo');
 ?>
                     <div class="form-row mt-3">
                         <div class="col-12" style="align-self: flex-end">

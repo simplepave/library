@@ -25,9 +25,10 @@ class SP_Validation {
     private $auto_test = [];
 
     private $pullout;
-    private $auto_test_on = false;
+    private $auto_test_on;
+
     private $bail_rev = false;
-    private $bail_on = false;
+    private $bail_all = false;
 
     public $status = true;
 
@@ -57,7 +58,7 @@ class SP_Validation {
             'phone'       => [1,     'value' => 'Не телефон.', 'default' => 'no_format', 'other' => '/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?(?:\d[\s-_]{0,3}?){7}$/'],
             'type'        => [[2,1]],
             'title'       => [1],
-            'parse_url'   => [1, 'default' => -1, 'other' => ['PHP_URL_SCHEME', 'PHP_URL_HOST', 'PHP_URL_PORT', 'PHP_URL_USER', 'PHP_URL_PASS', 'PHP_URL_PATH', 'PHP_URL_QUERY', 'PHP_URL_FRAGMENT']],
+            'parse_url'   => [1, 'default' => -1, 'other' => ['SCHEME', 'HOST', 'PORT', 'USER', 'PASS', 'PATH', 'QUERY', 'FRAGMENT']],
         ];
     }
 
@@ -71,10 +72,11 @@ class SP_Validation {
             foreach ($data as $name => $items) {
                 $this->_name = $name;
                 $this->_value = $this->name_isset();
-                $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '|')); // ?
+                $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '| '), -1, PREG_SPLIT_NO_EMPTY);
+                $variables = array_map('trim', $variables);
 
                 $bail = $this->bail_rev? !in_array('bail', $variables): in_array('bail', $variables);
-                $bail = $this->bail_on || $bail;
+                $bail = $this->bail_all || $bail;
 
                 if (in_array('required', $variables)) $this->validate('required');
                 elseif (empty($this->_value) && !is_bool($this->_value) && $this->_value !== '0')
@@ -87,10 +89,10 @@ class SP_Validation {
                     $key = trim($validate[0]);
 
                     if (array_key_exists($key, $this->validate)) {
-                        $param = $this->validate[$key][0];
-                        if (is_bool($param)) continue;
+                        $args = $this->validate[$key][0];
+                        if (is_bool($args)) continue;
 
-                        if (is_null($param) || $param === 0) {
+                        if (is_null($args) || $args === 0) {
 
                             if (isset($this->validate[$key]['other']))
                                 $this->_params = (array)$this->validate[$key]['other'];
@@ -100,11 +102,11 @@ class SP_Validation {
                         else {
                             $this->_params = [];
 
-                            if ($args = isset($validate[1])? trim($validate[1]): false) {
-                                $limit = (array)$param;
-                                $args = str_replace('\|', '|', $args);
-                                $params = explode(',', $args, $limit[0]);
-                                $limit = isset($param[1])? $param[1]: $limit[0];
+                            if ($params = isset($validate[1])? $validate[1]: false) {
+                                $args = (array)$args;
+                                $limit = isset($args[1])? $args[1]: $args[0];
+                                $params = str_replace('\|', '|', $params);
+                                $params = explode(',', $params, $args[0]);
 
                                 if (count($params) >= $limit)
                                     $this->_params = array_map('trim', $params);
@@ -132,9 +134,9 @@ class SP_Validation {
         $this->bail_rev = true;
     }
 
-    public function set_bail_on()
+    public function set_bail_all()
     {
-        $this->bail_on = true;
+        $this->bail_all = true;
     }
 
     /**
@@ -473,10 +475,10 @@ class SP_Validation {
 
     private function validate_parse_url()
     {
-        $param = $this->_params[0];
+        $param = strtoupper($this->_params[0]);
         $default = $this->validate['parse_url']['default'];
         $components = $this->validate['parse_url']['other'];
-        $component = in_array($param, $components, true)? constant($param): $default;
+        $component = in_array($param, $components)? constant('PHP_URL_' . $param): $default;
         $url = parse_url($this->_value, $component);
 
         $url && $this->fields['all'][$this->_name] = $url;

@@ -11,7 +11,7 @@
  */
 
     // $sp_valid->set_bail_rev(); // Revers Bail
-    // $sp_valid->set_bail_on();  // ALL On Bail
+    // $sp_valid->set_bail_all(); // ALL On Bail
 
     // $sp_valid->set_auto_test([
     //     'subject' => 'Subject',
@@ -28,7 +28,7 @@
      * date | date_format:Y-m-d H:i:s
      * regex:/^.+$/i ( \| === | ) | float | email
      * phone[:format]( return (mask)[+9 (999) 999-99-99] )
-     * parse_url[:( component )] = Alias of parse_url()
+     * parse_url[:( scheme | host | port | user | pass | path | query | fragment )]
      *
      * type = int | bool | float ( , or . ) | array
      * |type:int|       = (int)$value
