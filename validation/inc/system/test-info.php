@@ -18,7 +18,7 @@
         'numeric'     => '3',
         'float'       => '47,10',
         'confirmed'   => 'user@user.com',
-        'regex'       => 'http://site.com',
+        'regex'       => 'http://site.com/index.php',
         'date_format' => '15.12.2013',
         'phone'       => '+11112223344',
         'email'       => 'user@user.com',
@@ -31,10 +31,10 @@
         'numeric'     => 'group:numeric|numeric|type:int|between:3,7',
         'float'       => 'required|group:numeric|float|type:float',
         'confirmed'   => 'required|confirmed:email,E-mail',
-        'regex'       => 'regex:/^https?:\/\/\S*?\.\S*?$/',
-        'date_format' => 'required|date_format:d.m.Y|type:array,.',
-        'phone'       => 'required|phone|max:25',
-        'email'       => 'required|email|max:100|type:array,@',
+        'regex'       => 'group:outer|regex:/^https?:\/\/\S*?\.\S*?$/|parse_url:PHP_URL_PATH',
+        'date_format' => 'group:outer|required|date_format:d.m.Y|type:array,.',
+        'phone'       => 'group:outer|required|phone:format|max:25',
+        'email'       => 'group:outer|required|email|max:100|type:array,@',
         'subject'     => 'title:Subject :|group:string',
         'accepted'    => 'accepted|group:take',
         'options'     => 'group:take',
@@ -79,21 +79,23 @@
         </div>
     </div>
     <div class="col-3">
-        <div class="form-row mb-2">
-            <div class="col">
+        <div class="form-row">
+            <div class="col mb-2">
                 <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-secondary<?php echo $_form['accepted']? ' active': ''; ?>">
-                        <input name="accepted" type="checkbox" autocomplete="off"<?php echo $_form['accepted']? ' checked': ''; ?>> I agree
+                    <label class="sp-btn-accepted btn btn-outline-warning<?php echo $_form['accepted']? ' active': ''; ?>">
+                        <input name="accepted" type="checkbox" autocomplete="off"<?php echo $_form['accepted']? ' checked': ''; ?>> <span><i class="fa fa-check" aria-hidden="true"></i> I agree</span>
                     </label>
                 </div>
             </div>
-            <div class="col">
+            <div class="col mb-2">
                 <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-secondary<?php echo $_form['options'] == 'radio1'? ' active': ''; ?>">
-                        <input name="options" type="radio" value="radio1" autocomplete="off"<?php echo $_form['options'] == 'radio1'? ' checked': ''; ?>> Radio 1
+                    <label class="btn btn-outline-success<?php echo $_form['options'] != 'off'? ' active': ''; ?>">
+                        <input name="options" type="radio" value="on" autocomplete="off"<?php echo $_form['options'] != 'off'? ' checked': ''; ?>>
+                        <span>ON</span>
                     </label>
-                    <label class="btn btn-secondary<?php echo $_form['options'] == 'radio2'? ' active': ''; ?>">
-                        <input name="options" type="radio" value="radio2" autocomplete="off"<?php echo $_form['options'] == 'radio2'? ' checked': ''; ?>> Radio 2
+                    <label class="btn btn-outline-danger<?php echo $_form['options'] == 'off'? ' active': ''; ?>">
+                        <input name="options" type="radio" value="off" autocomplete="off"<?php echo $_form['options'] == 'off'? ' checked': ''; ?>>
+                        <span>OFF</span>
                     </label>
                 </div>
             </div>

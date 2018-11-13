@@ -54,11 +54,10 @@ class SP_Validation {
             'date_format' => [1,     'value' => 'Формат: %s',          'example' => 'Y-m-d H:i:s'],
             'confirmed'   => [[2,1], 'value' => 'Не совпадает с "%s".'],
             'email'       => [null,  'value' => 'Не e-mail.',  'other' => '/^.+@.+\..+$/i'],
-            'phone'       => [null,  'value' => 'Не телефон.', 'other' =>'/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?[\d-_\s]{7,14}$/'],
+            'phone'       => [1,     'value' => 'Не телефон.', 'default' => 'no_format', 'other' => '/^\+?\d[\s-_(]{0,3}?\d{3}[\s-_)]{0,3}?(?:\d[\s-_]{0,3}?){7}$/'],
             'type'        => [[2,1]],
             'title'       => [1],
-            // parse_url() PHP_URL_SCHEME, PHP_URL_HOST, PHP_URL_PORT, PHP_URL_USER,
-            //             PHP_URL_PASS, PHP_URL_PATH, PHP_URL_QUERY, PHP_URL_FRAGMENT
+            'parse_url'   => [1, 'default' => -1, 'other' => ['PHP_URL_SCHEME', 'PHP_URL_HOST', 'PHP_URL_PORT', 'PHP_URL_USER', 'PHP_URL_PASS', 'PHP_URL_PATH', 'PHP_URL_QUERY', 'PHP_URL_FRAGMENT']],
         ];
     }
 
@@ -91,7 +90,14 @@ class SP_Validation {
                         $param = $this->validate[$key][0];
                         if (is_bool($param)) continue;
 
-                        if (!is_null($param)) {
+                        if (is_null($param) || $param === 0) {
+
+                            if (isset($this->validate[$key]['other']))
+                                $this->_params = (array)$this->validate[$key]['other'];
+
+                            $this->validate($key);
+                        }
+                        else {
                             $this->_params = [];
 
                             if ($args = isset($validate[1])? trim($validate[1]): false) {
@@ -108,13 +114,6 @@ class SP_Validation {
                                 $this->_params = (array)$this->validate[$key]['default'];
 
                             if ($this->_params) $this->validate($key);
-                        }
-                        else {
-
-                            if (isset($this->validate[$key]['other']))
-                                $this->_params = (array)$this->validate[$key]['other'];
-
-                            $this->validate($key);
                         }
                     }
                 }
@@ -253,7 +252,7 @@ class SP_Validation {
     }
 
     /**
-     * Type
+     * Type:(type)
      */
 
     private function validate_type()
@@ -341,16 +340,33 @@ class SP_Validation {
     }
 
     /**
-     * Phone:([regex])
+     * Phone:([format])
      */
 
     private function validate_phone()
     {
-        return $this->validate_regex();
+        if (preg_match($this->validate['phone']['other'], $this->_value)) {
+            if ($this->_params[0] === 'format') {
+                $phone = preg_replace('/[^0-9]/', '', $this->_value);
+                $length = strlen($phone);
+
+                if ($length == 7)
+                    $phone = preg_replace('/(\d{3})(\d{2})(\d{2})/', "$1-$2-$3", $phone);
+                elseif ($length == 10)
+                    $phone = preg_replace('/(\d{3})(\d{3})(\d{2})(\d{2})/', "($1) $2-$3-$4", $phone);
+                elseif ($length == 11)
+                    $phone = preg_replace('/(\d{1})(\d{3})(\d{3})(\d{2})(\d{2})/', '+$1 ($2) $3-$4-$5', $phone);
+
+                $this->fields['all'][$this->_name] = $phone;
+            }
+        }
+        else return true;
+
+        return false;
     }
 
     /**
-     * E-mail:([regex])
+     * E-mail
      */
 
     private function validate_email()
@@ -396,7 +412,7 @@ class SP_Validation {
     }
 
     /**
-     * Date Format:([format])
+     * Date Format:(format)
      */
 
     private function validate_date_format()
@@ -416,7 +432,7 @@ class SP_Validation {
      * Accepted
      */
 
-    public function validate_accepted()
+    private function validate_accepted()
     {
         // $acceptable = ['yes', 'on', '1', 1, true, 'true'];
         // !in_array($this->_value, $acceptable, true);
@@ -427,7 +443,7 @@ class SP_Validation {
      * Confirmed:(name)
      */
 
-    public function validate_confirmed()
+    private function validate_confirmed()
     {
         $confirm = $this->name_isset($this->_params[0]);
 
@@ -443,7 +459,7 @@ class SP_Validation {
      * Title:(title)
      */
 
-    public function validate_title()
+    private function validate_title()
     {
         if ($this->pullout)
             $this->fields['title'][$this->_name] = $this->_params[0];
@@ -451,6 +467,22 @@ class SP_Validation {
         return false;
     }
 
+    /**
+     * Parse Url:([constant])
+     */
+
+    private function validate_parse_url()
+    {
+        $param = $this->_params[0];
+        $default = $this->validate['parse_url']['default'];
+        $components = $this->validate['parse_url']['other'];
+        $component = in_array($param, $components, true)? constant($param): $default;
+        $url = parse_url($this->_value, $component);
+
+        $url && $this->fields['all'][$this->_name] = $url;
+
+        return false;
+    }
 }
 
 endif;

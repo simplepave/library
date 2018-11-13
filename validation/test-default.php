@@ -26,23 +26,25 @@
      * min:3 | max:255 | confirmed:name[,title]
      * numeric | between:0,99
      * date | date_format:Y-m-d H:i:s
-     * regex:/^.+$/i ( \| === | ) | float | email | phone
+     * regex:/^.+$/i ( \| === | ) | float | email
+     * phone[:format]( return (mask)[+9 (999) 999-99-99] )
+     * parse_url[:( component )] = Alias of parse_url()
      *
      * type = int | bool | float ( , or . ) | array
-     * |type:int|       => (int)$value
-     * |type:bool|      => (bool)$value
-     * |type:float|     => (float)str_replace(',', '.', $value)
+     * |type:int|       = (int)$value
+     * |type:bool|      = (bool)$value
+     * |type:float|     = (float)str_replace(',', '.', $value)
      * |type:array,|    === explode(' ', $value)
      * |type:array,,|   === explode(',', $value)
      * |type:array,\||  === explode('|', $value)
      * |type:array,sep| === explode('sep', $value)
      *
-     * shield = ( | => \| )
+     * shield = ( | === \| )
      */
 
     $validation = $sp_valid->validation([
         'subject' => 'title:Subject -|group:mail',
-        'phone'   => 'title:Tel :|bail|required|group:mail|phone|max:25',
+        'phone'   => 'bail|required|phone:format|max:25',
         'email'   => 'title:E-mail :|bail|required|group:mail|email|max:100',
     ]);
 

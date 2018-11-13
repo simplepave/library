@@ -78,7 +78,7 @@
 
 <div class="container-fluid" style="max-width: 2560px; position: relative;">
     <div class="row">
-        <div class="col-2 pl-0" style="position: absolute; left: 0; margin-left: 15px;">
+        <div class="col pl-0" style="max-width: 33%; position: absolute; left: 0; margin-left: 15px;">
 <?php
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($sp_valid->status) {
@@ -103,7 +103,7 @@
 <?php
     if ($sp_menu) :
 ?>
-        <div class="col-2 pl-0" style="margin-right: auto; margin-left: auto;">
+        <div class="col px-0" style="max-width: 33%; margin-right: auto; margin-left: auto;">
             <div class="sp-dropdown dropdown btn-group mt-3 w-100">
 <?php
         if ($get_page)
@@ -143,7 +143,7 @@
     if ($get_auto_test) :
         if ($auto_test) :
 ?>
-        <div class="col-2 pl-0" style="position: absolute; right: 0;">
+        <div class="col pl-0" style="max-width: 33%; position: absolute; right: 0;">
             <div class="rounded text-center mt-3 py-2 border border-warning text-warning">
                 <span>Auto Test : ( WORKING )</span>
             </div>
@@ -151,7 +151,7 @@
 <?php
         else :
 ?>
-        <div class="col-2 pl-0" style="position: absolute; right: 0;">
+        <div class="col pl-0" style="max-width: 33%; position: absolute; right: 0;">
             <a id="sp-auto-test" class="btn btn-outline-success w-100 mt-3 py-2" href="#">Auto Test : ( ON )</a>
         </div>
 <?php

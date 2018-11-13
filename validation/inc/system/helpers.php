@@ -144,7 +144,7 @@ if (!function_exists('dump')) {
         }
 
         if ($i == 1)
-            $outer = '<ul class="sp-nav nav nav-tabs" role="tablist">' . $first_tablist . $tablist . '</ul><div class="tab-content">' . $first_groups . $groups . '</div>';
+            $outer = '<ul class="' . ($name == 'get_errors'? 'sp-nav': '') . ' nav nav-' . ($name == 'get_fields'? 'tabs': 'pills') . '" role="tablist">' . $first_tablist . $tablist . '</ul><div class="tab-content">' . $first_groups . $groups . '</div>';
 
         return $outer;
     }

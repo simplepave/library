@@ -11,7 +11,7 @@
 
     $validation = $sp_valid->validation([
         'subject' => 'title:Subject -|required|group:mail',
-        'phone'   => 'title:Tel :|bail|required|group:mail|phone|max:25',
+        'phone'   => 'bail|required|phone:format|max:25',
         'email'   => 'title:E-mail :|bail|required|group:mail|email|max:100',
     ]);
 
