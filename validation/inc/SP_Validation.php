@@ -352,12 +352,12 @@ class SP_Validation {
                 $phone = preg_replace('/[^0-9]/', '', $this->_value);
                 $length = strlen($phone);
 
-                if ($length == 7)
-                    $phone = preg_replace('/(\d{3})(\d{2})(\d{2})/', "$1-$2-$3", $phone);
+                if ($length == 11)
+                    $phone = preg_replace('/(\d{1})(\d{3})(\d{3})(\d{2})(\d{2})/', '+$1 ($2) $3-$4-$5', $phone);
                 elseif ($length == 10)
                     $phone = preg_replace('/(\d{3})(\d{3})(\d{2})(\d{2})/', "($1) $2-$3-$4", $phone);
-                elseif ($length == 11)
-                    $phone = preg_replace('/(\d{1})(\d{3})(\d{3})(\d{2})(\d{2})/', '+$1 ($2) $3-$4-$5', $phone);
+                elseif ($length <= 7 && $length > 4)
+                    $phone = preg_replace('/(\d+)?(\d{2})(\d{2})/', "$1-$2-$3", $phone);
 
                 $this->fields['all'][$this->_name] = $phone;
             }

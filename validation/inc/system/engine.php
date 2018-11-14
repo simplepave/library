@@ -17,7 +17,7 @@
 
     $sp_valid = new SP_Validation(true, $auto_test);
 
-    $home_title = get_class($sp_valid);
+    $home_title = 'Demo ( ' . get_class($sp_valid) . ' )';
     $sp_menu = [];
 
     $parse_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
