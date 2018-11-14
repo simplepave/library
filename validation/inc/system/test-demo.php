@@ -103,9 +103,9 @@
         <div class="form-row align-items-center">
             <div class="col">
                 <select name="select" class="form-control custom-select">
-                    <option value="city1"<?php echo $_form['select'] == 'city1'? ' selected': ''; ?>>City One</option>
-                    <option value="city2"<?php echo $_form['select'] == 'city2'? ' selected': ''; ?>>City Two</option>
-                    <option value="city3"<?php echo $_form['select'] == 'city3'? ' selected': ''; ?>>City Three</option>
+                    <option value="city-1"<?php echo $_form['select'] == 'city-1'? ' selected': ''; ?>>City One</option>
+                    <option value="city-2"<?php echo $_form['select'] == 'city-2'? ' selected': ''; ?>>City Two</option>
+                    <option value="city-3"<?php echo $_form['select'] == 'city-3'? ' selected': ''; ?>>City Three</option>
                 </select>
             </div>
         </div>

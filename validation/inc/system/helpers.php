@@ -144,7 +144,7 @@ if (!function_exists('dump')) {
         }
 
         if ($i == 1)
-            $outer = '<ul class="' . ($name == 'get_errors'? 'sp-nav': '') . ' nav nav-' . ($name == 'get_fields'? 'tabs': 'pills') . '" role="tablist">' . $first_tablist . $tablist . '</ul><div class="tab-content">' . $first_groups . $groups . '</div>';
+            $outer = '<ul class="sp-nav-session' . ($name == 'get_errors'? ' sp-nav': '') . ' nav nav-' . ($name == 'get_fields'? 'tabs': 'pills') . '" role="tablist">' . $first_tablist . $tablist . '</ul><div class="sp-tab-session tab-content">' . $first_groups . $groups . '</div>';
 
         return $outer;
     }
@@ -158,7 +158,7 @@ if (!function_exists('sp_test')) {
     function sp_test($name)
     {
         global $sp_valid;
-        return !@include(ABSPATH . $name . '.php');
+        return @include(ABSPATH . $name . '.php');
     }
 }
 

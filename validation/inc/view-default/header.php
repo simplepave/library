@@ -16,7 +16,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title><?php echo $get_page? $get_page . ' | ': '', $home_title; ?></title>
+        <title><?php echo $get_page? $get_page . ' | ' . $title: $home_title; ?></title>
 
         <!-- Favicon -->
         <link rel="apple-touch-icon" sizes="180x180" href="/validation/inc/view-default/favicon/apple-touch-icon.png">

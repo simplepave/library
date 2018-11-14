@@ -66,3 +66,7 @@
 .sp-btn-accepted.active i.fa {
     display: inline-block;
 }
+
+.sp-tab-session {
+    display: none;
+}

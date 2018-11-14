@@ -52,6 +52,34 @@ jQuery(document).ready(function($){
     });
 
     /**
+     * Storage
+     */
+
+    $('.sp-nav-session a').click(function(e) {
+        try {
+            sessionStorage.setItem('sp_nav_session', $(this).attr('href'));
+        }
+        catch (e) {
+            if (e == QUOTA_EXCEEDED_ERR)
+                console.log('QUOTA_EXCEEDED_ERR');
+        }
+    });
+
+    (function() {
+        let arg = sessionStorage.getItem('sp_nav_session');
+        let nav = $('.sp-nav-session a[href="' + arg + '"]');
+
+        if (arg !== null) {
+            if (nav.length)
+                nav.trigger('click');
+            else
+                sessionStorage.removeItem('sp_nav_session');
+        }
+
+        $('.sp-tab-session').show();
+    }());
+
+    /**
      * Phone
      */
 
