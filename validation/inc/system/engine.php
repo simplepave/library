@@ -82,18 +82,20 @@
     <div class="row">
         <div class="col pl-0" style="max-width: 33%; position: absolute; left: 0; margin-left: 15px;">
 <?php
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if ($sp_valid->status) {
-            $class = 'border-success text-success';
-            $text = '( true )';
-        } else {
-            $class = 'border-danger text-danger';
-            $text = '( false )';
-        }
-    } else {
+
+    if (is_null($sp_valid->status)) {
         $class = 'border-warning text-warning';
-        $text = '( bool )';
+        $text = '( null )';
     }
+    elseif ($sp_valid->status) {
+        $class = 'border-success text-success';
+        $text = '( true )';
+    }
+    else {
+        $class = 'border-danger text-danger';
+        $text = '( false )';
+    }
+
 ?>
             <div class="rounded text-center mt-3 py-2 border <?php echo $class; ?>">
                 <span>Status : <?php echo $text; ?></span>

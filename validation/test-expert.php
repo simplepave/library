@@ -4,26 +4,40 @@
     // $sp_valid->set_bail_all();
 
     $sp_valid->set_auto_test([
-        'subject' => 'Subject test',
         'phone'   => '+11112223344',
-        'email'   => 'user@user.com',
+        'email'   => 'user@test.com',
+        'subject' => 'Subject test',
     ]);
 
-    $validation = $sp_valid->validation([
-        'subject' => 'title:Subject -|required|group:mail',
+    $sp_valid->validation($request_post, [
         'phone'   => 'bail|required|phone:format|max:25',
         'email'   => 'title:E-mail :|bail|required|group:mail|email|max:100',
+        'subject' => 'title:Subject -|required|group:mail',
     ]);
 
-    $_form = $sp_valid->get_form();
+    $default = [
+        'phone'   => '+7 (111) 222-33-44',
+        'email'   => '',
+        'subject' => 'Subject default',
+    ];
+
+    $_form = function ($name) use ($sp_valid, $default) {
+
+        if ($GLOBALS['request_post'])
+            $result = $sp_valid->get_form($name);
+        else
+            $result = isset($default[$name])? $default[$name]: '';
+
+        return $result;
+    };
 
 ?>
 
 <!-- Form -->
 
-    <input name="phone"   type="tel"    value="<?php echo $_form['phone']; ?>" placeholder="PHONE" class="phone-mask">
-    <input name="email"   type="email"  value="<?php echo $_form['email']; ?>" placeholder="EMAIL">
-    <input name="subject" type="hidden" value="Subject!">
+    <input name="phone"   type="tel"   value="<?php echo $_form('phone'); ?>" placeholder="PHONE" class="phone-mask">
+    <input name="email"   type="email" value="<?php echo $_form('email'); ?>" placeholder="EMAIL">
+    <input name="subject" type="text"  value="<?php echo $_form('subject'); ?>">
 
 <!-- End Form -->
 

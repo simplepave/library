@@ -14,9 +14,9 @@
     // $sp_valid->set_bail_all(); // ALL On Bail
 
     // $sp_valid->set_auto_test([
-    //     'subject' => 'Subject',
     //     'phone'   => '+11112223344',
-    //     'email'   => 'user@user.com',
+    //     'email'   => 'user@test.com',
+    //     'subject' => 'Subject test',
     // ]);
 
     /**
@@ -42,19 +42,33 @@
      * shield = ( | === \| )
      */
 
-    $validation = $sp_valid->validation([
-        'subject' => 'title:Subject -|group:mail',
+    $sp_valid->validation($request_post, [
         'phone'   => 'bail|required|phone:format|max:25',
         'email'   => 'title:E-mail :|bail|required|group:mail|email|max:100',
+        'subject' => 'title:Subject -|group:mail',
     ]);
 
     /* $sp_valid->status */
 
     // $sp_valid->get_errors()
     // $sp_valid->get_empties()
-    // $sp_valid->get_fields()
+    // $sp_valid->get_fields([$key])
 
-    $_form = $sp_valid->get_form();
+    $default = [
+        'phone'   => '+7 (111) 222-33-44',
+        'email'   => '',
+        'subject' => 'Subject default',
+    ];
+
+    $_form = function ($name) use ($sp_valid, $default) {
+
+        if ($GLOBALS['request_post'])
+            $result = $sp_valid->get_form($name);
+        else
+            $result = isset($default[$name])? $default[$name]: '';
+
+        return $result;
+    };
 
 ?>
 
@@ -62,13 +76,13 @@
 
 <div class="form-row">
     <div class="col">
-        <input name="phone" type="tel" value="<?php echo $_form['phone']; ?>" placeholder="PHONE" class="form-control my-phone-mask">
+        <input name="phone" type="tel" value="<?php echo $_form('phone'); ?>" placeholder="PHONE" class="form-control my-phone-mask">
     </div>
     <div class="col">
-        <input name="email" type="email" value="<?php echo $_form['email']; ?>" placeholder="EMAIL" class="form-control">
+        <input name="email" type="email" value="<?php echo $_form('email'); ?>" placeholder="EMAIL" class="form-control">
     </div>
     <div class="col">
-        <input name="subject" type="text" value="<?php echo $_form['subject']; ?>" placeholder="SUBJECT" class="form-control">
+        <input name="subject" type="text" value="<?php echo $_form('subject'); ?>" placeholder="SUBJECT" class="form-control">
     </div>
 </div>
 

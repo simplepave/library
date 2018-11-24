@@ -36,7 +36,7 @@
         <!-- CSS -->
         <link rel="stylesheet" href="/validation/inc/view-default/css/style.css">
 
-        <!-- Jquery CSS -->
+        <!-- Jquery -->
         <script src="/validation/inc/view-default/js/jquery-3.3.1.slim.min.js"></script>
     </head>
     <body>

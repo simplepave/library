@@ -14,23 +14,26 @@ if (!class_exists('SP_Validation')) :
 
 class SP_Validation {
 
+    public $version = '1.1.0';
+
     private $validate;
-    private $_name, $_value;
+    private $request;
+    private $_name,   $_value;
     private $_params, $_args;
 
-    private $errors = [];
-    private $empties = [];
-    private $fields = [];
-    private $form = [];
+    private $errors    = [];
+    private $empties   = [];
+    private $fields    = [];
+    private $form      = [];
     private $auto_test = [];
 
     private $pullout;
     private $auto_test_on;
 
-    private $bail_rev = false;
-    private $bail_all = false;
+    private $bail_rev  = false;
+    private $bail_all  = false;
 
-    public $status = true;
+    public $status     = true;
 
     /**
      * Construct
@@ -66,12 +69,15 @@ class SP_Validation {
      * Basic
      */
 
-    public function validation($data = false)
+    public function validation($request = false, $data = false)
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && is_array($data)) {
+        if (is_array($request) && is_array($data)) {
+            $this->request = $request;
+
             foreach ($data as $name => $items) {
                 $this->_name = $name;
                 $this->_value = $this->name_isset();
+
                 $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '| '), -1, PREG_SPLIT_NO_EMPTY);
                 $variables = array_map('trim', $variables);
 
@@ -123,6 +129,7 @@ class SP_Validation {
                 if ($this->pullout) $this->group($items);
             }
         }
+        else $this->status = null;
     }
 
     /**
@@ -167,14 +174,14 @@ class SP_Validation {
         return $this->errors?: false;
     }
 
-    public function get_form()
+    public function get_form($name)
     {
-        return $this->form?: false;
+        return isset($this->form[$name])? $this->form[$name]: '';
     }
 
     public function get_fields($key = false)
     {
-        if ($this->status || $key === 'all')
+        if ($this->status)
             if ($key && isset($this->fields[$key]))
                 return $this->fields[$key];
             else
@@ -192,30 +199,30 @@ class SP_Validation {
      * Helper Methods
      */
 
-    private function name_isset($request = false)
+    private function name_isset($name = false, $write = true)
     {
-        $name = $request?: $this->_name;
-        $field = isset($_POST[$name])? trim($_POST[$name]): false;
+        $name = $name?: $this->_name;
+        $value = isset($this->request[$name])? trim($this->request[$name]): false;
 
         if ($this->auto_test_on && $this->auto_test && array_key_exists($name, $this->auto_test))
-            $field = $this->auto_test[$name];
+            $value = $this->auto_test[$name];
 
-        if (!$request) {
-            $this->form[$name] = $field;
+        if ($write) {
+            $this->form[$name] = $value;
 
             if ($this->pullout)
-                $this->fields['all'][$name] = $field;
+                $this->fields['all'][$name] = $value;
 
-            if (is_bool($field))
+            if (is_bool($value))
                 $this->empties[] = $name;
         }
 
-        return $field;
+        return $value;
     }
 
-    private function group($value)
+    private function group($items)
     {
-        if (preg_match('/group\s?:([^|]+)/', $value, $outer)) {
+        if (preg_match('/group\s?:([^|]+)/', $items, $outer)) {
             $groups = explode(',', $outer[1]);
             $name = $this->_name;
 
@@ -447,7 +454,7 @@ class SP_Validation {
 
     private function validate_confirmed()
     {
-        $confirm = $this->name_isset($this->_params[0]);
+        $confirm = $this->name_isset($this->_params[0], false);
 
         if ($confirm != $this->_value) {
             $this->_args = isset($this->_params[1])? $this->_params[1]: $this->_params[0];

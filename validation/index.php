@@ -17,14 +17,14 @@
  *   $sp_valid->set_bail_rev(); Revers Bail
  *   $sp_valid->set_bail_all(); ALL On Bail
  *
- *   $sp_valid->set_auto_test([]);
- *   $sp_valid->validation([]);
+ *   $sp_valid->set_auto_test($seeds = array);
+ *   $sp_valid->validation($request = array, $validation = array);
  *
- *   $sp_valid->get_form() === trim($_POST[$name]) || false
+ *   $sp_valid->get_form($name) === trim($request[$name]) || false
  *
  *   $sp_valid->get_errors()
  *   $sp_valid->get_empties()
- *   $sp_valid->get_fields()
+ *   $sp_valid->get_fields([$key])
  *
  *   $sp_valid->get_auto_test() === $sp_valid->set_auto_test([])
  *
@@ -67,6 +67,15 @@ $view = 'view-default';
  */
 
 define('ABSPATH', dirname(__FILE__) . '/');
+
+/**
+ * Request
+ */
+
+$request_post = false;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+    $request_post = $_POST;
 
 /**
  * test system

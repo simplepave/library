@@ -157,7 +157,7 @@ if (!function_exists('dump')) {
 if (!function_exists('sp_test')) {
     function sp_test($name)
     {
-        global $sp_valid;
+        global $sp_valid, $request_post;
         return @include(ABSPATH . $name . '.php');
     }
 }
