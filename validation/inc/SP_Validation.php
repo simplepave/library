@@ -14,7 +14,7 @@ if (!class_exists('SP_Validation')) :
 
 class SP_Validation {
 
-    public $version = '1.1.0';
+    public $version = '1.2.0';
 
     private $validate;
     private $request;
@@ -25,6 +25,7 @@ class SP_Validation {
     private $empties   = [];
     private $fields    = [];
     private $form      = [];
+    private $language  = [];
     private $auto_test = [];
 
     private $pullout;
@@ -147,6 +148,16 @@ class SP_Validation {
     }
 
     /**
+     * Set Language
+     */
+
+    public function set_language($data = false)
+    {
+        if (is_array($data))
+            $this->language = $data;
+    }
+
+    /**
      * Set Auto Test
      */
 
@@ -241,7 +252,10 @@ class SP_Validation {
 
     private function errors($key)
     {
-        $value = $this->validate[$key]['value'];
+        if ($this->language && !empty($this->language[$key]))
+            $value = $this->language[$key];
+        else
+            $value = $this->validate[$key]['value'];
 
         if ($this->_args)
             $value = vsprintf($value, (array)$this->_args);

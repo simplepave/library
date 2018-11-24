@@ -10,13 +10,30 @@
  * info@simplepave.ru
  */
 
-    // $sp_valid->set_bail_rev(); // Revers Bail
-    // $sp_valid->set_bail_all(); // ALL On Bail
-
     // $sp_valid->set_auto_test([
     //     'phone'   => '+11112223344',
     //     'email'   => 'user@test.com',
     //     'subject' => 'Subject test',
+    // ]);
+
+    // $sp_valid->set_bail_rev(); // Revers Bail
+    // $sp_valid->set_bail_all(); // ALL On Bail
+
+    // $sp_valid->set_language([
+    //     'required'    => 'Field is required.',
+    //     'accepted'    => 'Confirm selection.',
+    //     'max'         => 'Max %s characters.',
+    //     'min'         => 'Min %s characters.',
+    //     'numeric'     => 'Not a number.',
+    //     'float'       => 'Not a float.',
+    //     'between'     => 'Not between %s and %s.',
+    //     'string'      => 'Not a string.',
+    //     'regex'       => 'Wrong format.',
+    //     'date'        => 'Not a date.',
+    //     'date_format' => 'Format: %s',
+    //     'confirmed'   => 'Does not match "%s".',
+    //     'email'       => 'Not a email.',
+    //     'phone'       => 'Not a phone.',
     // ]);
 
     /**
