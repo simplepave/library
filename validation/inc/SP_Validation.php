@@ -14,13 +14,13 @@ if (!class_exists('SP_Validation')) :
 
 class SP_Validation
 {
-    public $version = '1.3.0';
+    public $version = '2.0.0';
 
     private $pullout;
     private $auto_test_on;
 
-    private $validate;
-    private $request, $bail;
+    private $validate, $request;
+    private $set_bail, $_bail;
     private $_name, $_value;
     private $_params, $_args;
 
@@ -40,8 +40,8 @@ class SP_Validation
 
     public function __construct($pullout = true, $auto_test_on = false)
     {
-        $this->pullout = $pullout;
-        $this->auto_test_on = $auto_test_on;
+        $this->pullout      = is_bool($pullout)? $pullout: true;
+        $this->auto_test_on = is_bool($auto_test_on)? $auto_test_on: false;
 
         $this->validate = [
             'required'    => [false, 'value' => 'Обязательное поле.'],
@@ -68,62 +68,59 @@ class SP_Validation
      * Basic
      */
 
-    public function validation($request = false, $data = false, $bail = false)
+    public function validation($request = false, $data = false, $set_bail = false)
     {
         if (is_array($request) && is_array($data)) {
             $this->request = $request;
-            $this->bail = $bail? (string)$bail: '';
+            $this->set_bail = $set_bail? (string)$set_bail: false;
 
             foreach ($data as $name => $items) {
                 $this->_name = $name;
                 $this->_value = $this->set_value();
 
-                $variables = $this->variables($items);
+                if ($variables = $this->variables($items)) {
 
-                if (!$this->required_field(in_array('required', $variables)))
-                    continue;
+                    foreach ($variables as $variable) {
+                        if ($this->_bail && isset($this->errors[$this->_name])) break;
 
-                $bail = $this->bail(in_array('bail', $variables));
+                        $validate = explode(':', $variable, 2);
+                        $key = trim($validate[0]);
 
-                foreach ($variables as $variable) {
-                    if ($bail && isset($this->errors[$this->_name])) break;
+                        if (array_key_exists($key, $this->validate)) {
+                            $args = $this->validate[$key][0];
 
-                    $validate = explode(':', $variable, 2);
-                    $key = trim($validate[0]);
+                            if (is_bool($args)) continue;
 
-                    if (array_key_exists($key, $this->validate)) {
-                        $args = $this->validate[$key][0];
-                        if (is_bool($args)) continue;
+                            if (is_null($args) || $args === 0) {
 
-                        if (is_null($args) || $args === 0) {
+                                if (isset($this->validate[$key]['other']))
+                                    $this->_params = (array)$this->validate[$key]['other'];
 
-                            if (isset($this->validate[$key]['other']))
-                                $this->_params = (array)$this->validate[$key]['other'];
-
-                            $this->validate($key);
-                        }
-                        else {
-                            $this->_params = [];
-
-                            if ($params = isset($validate[1])? $validate[1]: false) {
-                                $args = (array)$args;
-                                $limit = isset($args[1])? $args[1]: $args[0];
-                                $params = str_replace('\|', '|', $params);
-                                $params = explode(',', $params, $args[0]);
-
-                                if (count($params) >= $limit)
-                                    $this->_params = array_map('trim', $params);
+                                $this->validate($key);
                             }
+                            else {
+                                $this->_params = [];
 
-                            if (!$this->_params && isset($this->validate[$key]['default']))
-                                $this->_params = (array)$this->validate[$key]['default'];
+                                if ($params = isset($validate[1])? $validate[1]: false) {
+                                    $args = (array)$args;
+                                    $limit = isset($args[1])? $args[1]: $args[0];
+                                    $params = str_replace('\|', '|', $params);
+                                    $params = explode(',', $params, $args[0]);
 
-                            if ($this->_params) $this->validate($key);
+                                    if (count($params) >= $limit)
+                                        $this->_params = array_map('trim', $params);
+                                }
+
+                                if (!$this->_params && isset($this->validate[$key]['default']))
+                                    $this->_params = (array)$this->validate[$key]['default'];
+
+                                if ($this->_params) $this->validate($key);
+                            }
                         }
                     }
-                }
 
-                if ($this->pullout) $this->group($items);
+                    if ($this->pullout) $this->group($items);
+                }
             }
         }
         else $this->status = null;
@@ -238,35 +235,47 @@ class SP_Validation
         $items = trim($items, '| ');
         $items = preg_split("/(?<=[^\\\])\|/", $items, -1, PREG_SPLIT_NO_EMPTY);
 
-        return array_map('trim', $items);
+        if ($items) {
+            $items = array_map('trim', $items);
+
+            if ($this->empty_field(in_array('required', $items)))
+                return false;
+
+            $this->set_bail(in_array('bail', $items));
+
+            return $items;
+        }
+
+        return false;
     }
 
     /**
-     * Required Field
+     * Empty Field
      */
 
-    private function required_field($required)
+    private function empty_field($required)
     {
         if ($required)
             $this->validate('required');
         elseif (empty($this->_value) && !is_bool($this->_value) && $this->_value !== '0')
-            return false;
+            return true;
 
-        return true;
+        return false;
     }
 
     /**
-     * Bail
+     * Set Bail
      */
 
-    private function bail($bail)
+    private function set_bail($bail)
     {
-        switch ($this->bail) {
-            case 'all': $bail = true; break;
-            case 'rev': $bail = !$bail; break;
-        }
+        if ($this->set_bail)
+            switch ($this->set_bail) {
+                case 'all': $bail = true;   break;
+                case 'rev': $bail = !$bail; break;
+            }
 
-        return $bail;
+        $this->_bail = $bail;
     }
 
     /**

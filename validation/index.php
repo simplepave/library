@@ -16,7 +16,7 @@
  *   $sp_valid->set_auto_test(array $seeds);
  *   $sp_valid->set_language(array $language);
  *
- *   $sp_valid->validation(array $request, array $validation[, string $bail = false]); $bail: 'all', 'rev'
+ *   $sp_valid->validation(array $request, array $validation[, string $set_bail = false]); $set_bail: 'all', 'rev'
  *
  *   $sp_valid->status = null | false | true
  *
