@@ -6,9 +6,6 @@
         'subject' => 'Subject test',
     ]);
 
-    // $sp_valid->set_bail_rev();
-    // $sp_valid->set_bail_all();
-
     $sp_valid->set_language([
         'required'    => 'Field is required.',
         'accepted'    => 'Confirm selection.',
@@ -27,10 +24,10 @@
     ]);
 
     $sp_valid->validation($request_post, [
-        'phone'   => 'bail|required|phone:format|max:25',
-        'email'   => 'title:E-mail :|bail|required|group:mail|email|max:100',
-        'subject' => 'title:Subject -|required|group:mail',
-    ]);
+        'phone'   => 'required|phone:format|max:25',
+        'email'   => 'required|email|max:100|title:E-mail :|group:mail',
+        'subject' => 'title:Subject -|group:mail',
+    ], 'all');
 
     $default = [
         'phone'   => '+7 (111) 222-33-44',

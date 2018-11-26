@@ -16,9 +16,6 @@
     //     'subject' => 'Subject test',
     // ]);
 
-    // $sp_valid->set_bail_rev(); // Revers Bail
-    // $sp_valid->set_bail_all(); // ALL On Bail
-
     // $sp_valid->set_language([
     //     'required'    => 'Field is required.',
     //     'accepted'    => 'Confirm selection.',
@@ -48,28 +45,31 @@
      * parse_url[:( scheme | host | port | user | pass | path | query | fragment )]
      *
      * type = int | bool | float ( , or . ) | array
-     * |type:int|       = (int)$value
-     * |type:bool|      = (bool)$value
-     * |type:float|     = (float)str_replace(',', '.', $value)
-     * |type:array,|    === explode(' ', $value)
-     * |type:array,,|   === explode(',', $value)
-     * |type:array,\||  === explode('|', $value)
-     * |type:array,sep| === explode('sep', $value)
+     * type:int       = (int)$value
+     * type:bool      = (bool)$value
+     * type:float     = (float)str_replace(',', '.', $value)
+     * type:array,    === explode(' ', $value)
+     * type:array,,   === explode(',', $value)
+     * type:array,\|  === explode('|', $value)
+     * type:array,sep === explode('sep', $value)
      *
      * shield = ( | === \| )
      */
 
     $sp_valid->validation($request_post, [
-        'phone'   => 'bail|required|phone:format|max:25',
-        'email'   => 'title:E-mail :|bail|required|group:mail|email|max:100',
+        'phone'   => 'required|phone:format|max:25',
+        'email'   => 'required|email|max:100|title:E-mail :|group:mail',
         'subject' => 'title:Subject -|group:mail',
     ]);
 
-    /* $sp_valid->status */
-
-    // $sp_valid->get_errors()
-    // $sp_valid->get_empties()
-    // $sp_valid->get_fields([$key])
+    /**
+     * $sp_valid->status = null | false | true
+     *
+     * $sp_valid->get_empties();
+     * $sp_valid->get_errors();
+     * $sp_valid->get_fields([string $key = false]); $key: 'all', ['title'], [...]
+     * $sp_valid->get_form(string $name); return trim($request[$name]) or false
+     */
 
     $default = [
         'phone'   => '+7 (111) 222-33-44',

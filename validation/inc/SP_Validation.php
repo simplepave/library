@@ -12,29 +12,27 @@
 
 if (!class_exists('SP_Validation')) :
 
-class SP_Validation {
+class SP_Validation
+{
+    public $version = '1.3.0';
 
-    public $version = '1.2.1';
+    private $pullout;
+    private $auto_test_on;
 
     private $validate;
-    private $request;
-    private $_name,   $_value;
+    private $request, $bail;
+    private $_name, $_value;
     private $_params, $_args;
+
+    private $auto_test = [];
+    private $language  = [];
 
     private $empties   = [];
     private $errors    = [];
     private $fields    = [];
     private $form      = [];
-    private $language  = [];
-    private $auto_test = [];
 
-    private $pullout;
-    private $auto_test_on;
-
-    private $bail_rev  = false;
-    private $bail_all  = false;
-
-    public $status     = true;
+    public $status = true;
 
     /**
      * Construct
@@ -70,24 +68,22 @@ class SP_Validation {
      * Basic
      */
 
-    public function validation($request = false, $data = false)
+    public function validation($request = false, $data = false, $bail = false)
     {
         if (is_array($request) && is_array($data)) {
             $this->request = $request;
+            $this->bail = $bail? (string)$bail: '';
 
             foreach ($data as $name => $items) {
                 $this->_name = $name;
                 $this->_value = $this->set_value();
 
-                $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '| '), -1, PREG_SPLIT_NO_EMPTY);
-                $variables = array_map('trim', $variables);
+                $variables = $this->variables($items);
 
-                $bail = $this->bail_rev? !in_array('bail', $variables): in_array('bail', $variables);
-                $bail = $this->bail_all || $bail;
-
-                if (in_array('required', $variables)) $this->validate('required');
-                elseif (empty($this->_value) && !is_bool($this->_value) && $this->_value !== '0')
+                if (!$this->required_field(in_array('required', $variables)))
                     continue;
+
+                $bail = $this->bail(in_array('bail', $variables));
 
                 foreach ($variables as $variable) {
                     if ($bail && isset($this->errors[$this->_name])) break;
@@ -134,45 +130,27 @@ class SP_Validation {
     }
 
     /**
-     * Set Bail Rev
+     * Set Auto Test
      */
 
-    public function set_bail_rev()
+    public function set_auto_test($seeds = false)
     {
-        $this->bail_rev = true;
-    }
-
-    /**
-     * Set Bail All
-     */
-
-    public function set_bail_all()
-    {
-        $this->bail_all = true;
+        if (is_array($seeds)) {
+            if ($this->auto_test_on)
+                $this->auto_test = $seeds;
+            else
+                $this->auto_test = true;
+        }
     }
 
     /**
      * Set Language
      */
 
-    public function set_language($data = false)
+    public function set_language($language = false)
     {
-        if (is_array($data))
-            $this->language = $data;
-    }
-
-    /**
-     * Set Auto Test
-     */
-
-    public function set_auto_test($data = false)
-    {
-        if (is_array($data)) {
-            if ($this->auto_test_on)
-                $this->auto_test = $data;
-            else
-                $this->auto_test = true;
-        }
+        if (is_array($language))
+            $this->language = $language;
     }
 
     /**
@@ -212,9 +190,9 @@ class SP_Validation {
      * Get Form
      */
 
-    public function get_form($name)
+    public function get_form($name = false)
     {
-        return isset($this->form[$name])? $this->form[$name]: '';
+        return $name && isset($this->form[$name])? $this->form[$name]: '';
     }
 
     /**
@@ -249,6 +227,46 @@ class SP_Validation {
         }
 
         return $value;
+    }
+
+    /**
+     * Variables
+     */
+
+    private function variables($items)
+    {
+        $items = trim($items, '| ');
+        $items = preg_split("/(?<=[^\\\])\|/", $items, -1, PREG_SPLIT_NO_EMPTY);
+
+        return array_map('trim', $items);
+    }
+
+    /**
+     * Required Field
+     */
+
+    private function required_field($required)
+    {
+        if ($required)
+            $this->validate('required');
+        elseif (empty($this->_value) && !is_bool($this->_value) && $this->_value !== '0')
+            return false;
+
+        return true;
+    }
+
+    /**
+     * Bail
+     */
+
+    private function bail($bail)
+    {
+        switch ($this->bail) {
+            case 'all': $bail = true; break;
+            case 'rev': $bail = !$bail; break;
+        }
+
+        return $bail;
     }
 
     /**

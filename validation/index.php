@@ -11,22 +11,19 @@
  */
 
 /**
- *   $sp_valid = new SP_Validation(false) = get_fields => false
- *   $sp_valid = new SP_Validation((true || false), true) = auto_test => true
+ *   $sp_valid = new SP_Validation([bool $pullout = true][, bool $auto_test_on = false]);
  *
- *   $sp_valid->set_bail_rev(); Revers Bail
- *   $sp_valid->set_bail_all(); ALL On Bail
+ *   $sp_valid->set_auto_test(array $seeds);
+ *   $sp_valid->set_language(array $language);
  *
- *   $sp_valid->set_auto_test($seeds = array);
- *   $sp_valid->validation($request = array, $validation = array);
+ *   $sp_valid->validation(array $request, array $validation[, string $bail = false]); $bail: 'all', 'rev'
  *
- *   $sp_valid->get_form($name) === trim($request[$name]) || false
+ *   $sp_valid->status = null | false | true
  *
- *   $sp_valid->get_errors()
- *   $sp_valid->get_empties()
- *   $sp_valid->get_fields([$key])
- *
- *   $sp_valid->get_auto_test() === $sp_valid->set_auto_test([])
+ *   $sp_valid->get_empties();
+ *   $sp_valid->get_errors();
+ *   $sp_valid->get_fields([string $key = false]); $key: 'all', ['title'], [...]
+ *   $sp_valid->get_form(string $name); return trim($request[$name]) or false
  *
  *   * ************* *** ************* *
  *
