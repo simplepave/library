@@ -14,15 +14,15 @@ if (!class_exists('SP_Validation')) :
 
 class SP_Validation {
 
-    public $version = '1.2.0';
+    public $version = '1.2.1';
 
     private $validate;
     private $request;
     private $_name,   $_value;
     private $_params, $_args;
 
-    private $errors    = [];
     private $empties   = [];
+    private $errors    = [];
     private $fields    = [];
     private $form      = [];
     private $language  = [];
@@ -77,7 +77,7 @@ class SP_Validation {
 
             foreach ($data as $name => $items) {
                 $this->_name = $name;
-                $this->_value = $this->name_isset();
+                $this->_value = $this->set_value();
 
                 $variables = preg_split("/(?<=[^\\\])\|/", trim($items, '| '), -1, PREG_SPLIT_NO_EMPTY);
                 $variables = array_map('trim', $variables);
@@ -134,13 +134,17 @@ class SP_Validation {
     }
 
     /**
-     * Set Bail
+     * Set Bail Rev
      */
 
     public function set_bail_rev()
     {
         $this->bail_rev = true;
     }
+
+    /**
+     * Set Bail All
+     */
 
     public function set_bail_all()
     {
@@ -172,7 +176,7 @@ class SP_Validation {
     }
 
     /**
-     * Get Response
+     * Get Empties
      */
 
     public function get_empties()
@@ -180,15 +184,18 @@ class SP_Validation {
         return $this->empties?: false;
     }
 
+    /**
+     * Get Errors
+     */
+
     public function get_errors()
     {
         return $this->errors?: false;
     }
 
-    public function get_form($name)
-    {
-        return isset($this->form[$name])? $this->form[$name]: '';
-    }
+    /**
+     * Get Fields
+     */
 
     public function get_fields($key = false)
     {
@@ -201,16 +208,29 @@ class SP_Validation {
         return false;
     }
 
+    /**
+     * Get Form
+     */
+
+    public function get_form($name)
+    {
+        return isset($this->form[$name])? $this->form[$name]: '';
+    }
+
+    /**
+     * Get Auto Test
+     */
+
     public function get_auto_test()
     {
         return $this->auto_test?: false;
     }
 
     /**
-     * Helper Methods
+     * Set Value
      */
 
-    private function name_isset($name = false, $write = true)
+    private function set_value($name = false, $write = true)
     {
         $name = $name?: $this->_name;
         $value = isset($this->request[$name])? trim($this->request[$name]): false;
@@ -231,23 +251,22 @@ class SP_Validation {
         return $value;
     }
 
-    private function group($items)
+    /**
+     * Validate
+     */
+
+    private function validate($method)
     {
-        if (preg_match('/group\s?:([^|]+)/', $items, $outer)) {
-            $groups = explode(',', $outer[1]);
-            $name = $this->_name;
+        if (method_exists($this, 'validate_' . $method)) {
+            $this->_args && $this->_args = false;
 
-            foreach ($groups as $group) {
-                $group = str_replace(' ', '', $group);
-
-                if (!in_array($group, ['all', 'title']))
-                    $this->fields[$group][$name] = $this->fields['all'][$name];
-            }
+            if ($this->{'validate_' . $method}())
+                $this->errors($method);
         }
     }
 
     /**
-     * Basic Helper Methods
+     * Errors
      */
 
     private function errors($key)
@@ -264,13 +283,22 @@ class SP_Validation {
         $this->status && $this->status = false;
     }
 
-    private function validate($key)
-    {
-        if (method_exists($this, 'validate_' . $key)) {
-            $this->_args && $this->_args = false;
+    /**
+     * Group
+     */
 
-            if ($this->{'validate_' . $key}())
-                $this->errors($key);
+    private function group($items)
+    {
+        if (preg_match('/group\s?:([^|]+)/', $items, $outer)) {
+            $groups = explode(',', $outer[1]);
+            $name = $this->_name;
+
+            foreach ($groups as $group) {
+                $group = str_replace(' ', '', $group);
+
+                if (!in_array($group, ['all', 'title']))
+                    $this->fields[$group][$name] = $this->fields['all'][$name];
+            }
         }
     }
 
@@ -440,7 +468,7 @@ class SP_Validation {
 
     private function validate_date_format()
     {
-        $dateTime = DateTime::createFromFormat('!'.$this->_params[0], $this->_value);
+        $dateTime = DateTime::createFromFormat('!' . $this->_params[0], $this->_value);
 
         if (!$dateTime || $dateTime->format($this->_params[0]) != $this->_value) {
             $date = new DateTime();
@@ -457,8 +485,6 @@ class SP_Validation {
 
     private function validate_accepted()
     {
-        // $acceptable = ['yes', 'on', '1', 1, true, 'true'];
-        // !in_array($this->_value, $acceptable, true);
         return is_bool($this->_value);
     }
 
@@ -468,7 +494,7 @@ class SP_Validation {
 
     private function validate_confirmed()
     {
-        $confirm = $this->name_isset($this->_params[0], false);
+        $confirm = $this->set_value($this->_params[0], false);
 
         if ($confirm != $this->_value) {
             $this->_args = isset($this->_params[1])? $this->_params[1]: $this->_params[0];
